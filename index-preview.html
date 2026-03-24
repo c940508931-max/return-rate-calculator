@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>女装退货率计算器</title>
+<style>
+/* ===== Reset & Base ===== */
+*,::before,::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#09090b;
+  --surface:#13131a;
+  --surface2:#1c1c27;
+  --surface3:#252532;
+  --border:#2a2a3a;
+  --border2:#353548;
+  --accent:#7c3aed;
+  --accent2:#a855f7;
+  --accent-dim:rgba(124,58,237,.18);
+  --accent2-dim:rgba(168,85,247,.12);
+  --green:#22c55e;
+  --green-dim:rgba(34,197,94,.15);
+  --yellow:#eab308;
+  --yellow-dim:rgba(234,179,8,.15);
+  --orange:#f97316;
+  --orange-dim:rgba(249,115,22,.15);
+  --red:#ef4444;
+  --red-dim:rgba(239,68,68,.15);
+  --text:#f4f4f5;
+  --text2:#a1a1aa;
+  --text3:#52525b;
+  --radius:14px;
+  --radius2:10px;
+  --radius3:8px;
+}
+html{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;padding:20px 16px 40px;max-width:860px;margin:0 auto}
+
+/* ===== Typography ===== */
+h1{font-size:18px;font-weight:700;background:linear-gradient(135deg,#a855f7,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px;letter-spacing:-0.3px}
+h1 span{font-size:11px;font-weight:400;display:block;margin-top:3px;-webkit-text-fill-color:var(--text3);letter-spacing:0}
+
+/* ===== Cards ===== */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  margin-bottom:12px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-dim),transparent);
+}
+.card:hover{border-color:var(--border2)}
+
+.card-title{
+  font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;
+  margin-bottom:12px;display:flex;align-items:center;gap:6px;
+}
+.card-title .icon{font-size:13px}
+
+/* ===== Upload Zone ===== */
+input[type="file"]{display:none}
+.upload-zone{
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:8px;
+  background:var(--surface2);
+  border:1.5px dashed var(--border2);
+  border-radius:var(--radius2);
+  padding:24px 20px;
+  cursor:pointer;
+  font-size:13px;color:var(--text2);
+  transition:all .2s;
+  text-align:center;
+  position:relative;
+}
+.upload-zone:hover{
+  border-color:var(--accent);
+  background:var(--accent-dim);
+  color:var(--text);
+}
+.upload-zone .sub{font-size:11px;color:var(--text3);margin-top:2px}
+.upload-zone:hover .sub{color:var(--text2)}
+
+/* ===== Status Bar ===== */
+.status-bar{
+  font-size:11px;color:var(--text2);
+  padding:8px 12px;
+  background:var(--surface2);
+  border-radius:var(--radius3);
+  margin-top:10px;
+  display:none;
+  align-items:center;gap:6px;
+}
+.status-bar.show{display:flex}
+.status-bar.ok{border:1px solid rgba(34,197,94,.3);background:var(--green-dim);color:var(--green)}
+.status-bar.err{border:1px solid rgba(239,68,68,.3);background:var(--red-dim);color:var(--red)}
+
+/* ===== Progress ===== */
+#progressWrap{margin-top:10px;display:none}
+#progBar{background:var(--surface3);border-radius:6px;height:5px;overflow:hidden}
+#progFill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px;transition:width .15s;width:0%}
+#progText{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px}
+
+/* ===== Manual Entry Row ===== */
+.entry-grid{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr auto;
+  gap:6px;align-items:end;
+  margin-bottom:10px;
+}
+.entry-grid label{
+  font-size:10px;color:var(--text3);margin-bottom:3px;display:block;
+}
+.entry-grid input,.entry-grid select{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--radius3);
+  padding:7px 8px;
+  font-size:13px;color:var(--text);
+  width:100%;
+  transition:border-color .15s;
+}
+.entry-grid input:focus,.entry-grid select:focus{
+  outline:none;border-color:var(--accent);
+}
+.entry-grid input[type="number"]{-moz-appearance:textfield}
+.entry-grid input::-webkit-outer-spin-button,
+.entry-grid input::-webkit-inner-spin-button{-webkit-appearance:none}
+.btn{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:var(--radius3);
+  padding:8px 14px;font-size:13px;font-weight:600;
+  color:#fff;cursor:pointer;white-space:nowrap;
+  transition:opacity .15s;
+}
+.btn:hover{opacity:.88}
+.btn:active{opacity:.7}
+.btn.green{background:linear-gradient(135deg,#16a34a,#22c55e)}
+.btn.ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+.btn.ghost:hover{border-color:var(--accent);color:var(--text)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ===== Search ===== */
+.search-row{
+  display:flex;gap:8px;align-items:center;
+  margin-bottom:10px;
+}
+.search-wrap{position:relative;flex:1}
+.search-wrap input{padding-left:34px}
+.search-wrap .si{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:var(--text3);pointer-events:none;font-size:14px;
+}
+.search-count{font-size:10px;color:var(--text3);margin-top:3px;text-align:right;min-height:14px}
+select#skuSel{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--radius3);
+  padding:8px 10px;
+  font-size:13px;color:var(--text);
+  width:100%;max-width:220px;
+  transition:border-color .15s;
+}
+select#skuSel:focus{outline:none;border-color:var(--accent)}
+
+/* ===== Data Table ===== */
+.tbl-wrap{
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  overflow:hidden;
+  max-height:340px;
+  overflow-y:auto;
+}
+.tb{width:100%;border-collapse:collapse;font-size:12px}
+.tb th{
+  font-size:10px;font-weight:600;color:var(--text3);
+  padding:8px 10px;text-align:left;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:2;
+  letter-spacing:.5px;
+}
+.tb th.r{text-align:right}
+.tb td{
+  padding:7px 10px;font-size:12px;
+  border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+.tb td.r{text-align:right}
+.tb td.n{color:var(--text3)}
+.tb tr:last-child td{border-bottom:none}
+.tb tr.list-row{cursor:pointer;transition:background .12s}
+.tb tr.list-row:hover td{background:var(--accent-dim)}
+.tb tr.list-row.sel td{background:var(--accent2-dim)}
+.tb tr.list-row.sel td:first-child{border-left:3px solid var(--accent)}
+.del-btn{
+  color:var(--red);cursor:pointer;font-size:11px;
+  padding:2px 6px;border-radius:4px;
+  background:var(--red-dim);transition:background .12s;
+}
+.del-btn:hover{background:rgba(239,68,68,.3)}
+
+/* ===== Preview Area ===== */
+#previewArea{margin-top:14px;display:none}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px}
+.preview-table th{
+  font-size:10px;font-weight:600;color:var(--text3);
+  padding:6px 8px;text-align:center;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  letter-spacing:.5px;
+}
+.preview-table th:first-child{text-align:left}
+.preview-table td{
+  padding:6px 8px;border-bottom:1px solid var(--border);
+  text-align:center;font-size:12px;color:var(--text);
+}
+.preview-table td:first-child{text-align:left;font-weight:600}
+.preview-table tr:last-child td{border-bottom:none}
+.num-input,.rate-input,.time-select{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:4px 6px;
+  font-size:12px;color:var(--text);
+  text-align:center;
+  transition:border-color .15s;
+}
+.num-input:focus,.rate-input:focus,.time-select:focus{
+  outline:none;border-color:var(--accent);
+}
+.zaitu-inline{display:flex;gap:3px;align-items:center;justify-content:center}
+.zaitu-inline input{width:50px!important;padding:3px 4px!important;font-size:11px!important}
+
+/* ===== Batch Chips ===== */
+.bchip{
+  display:inline-block;border-radius:5px;
+  padding:2px 8px;font-size:11px;font-weight:700;
+}
+.bchip.b1{background:var(--green-dim);color:var(--green)}
+.bchip.b2{background:var(--yellow-dim);color:var(--yellow)}
+.bchip.b3{background:var(--orange-dim);color:var(--orange)}
+.bchip.b4{background:var(--red-dim);color:var(--red)}
+
+/* ===== Totals ===== */
+.tot-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;margin-top:10px;
+}
+.tot-box{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  padding:10px 12px;text-align:center;
+}
+.tot-box .l{font-size:10px;color:var(--text3);margin-bottom:4px}
+.tot-box .v{font-size:20px;font-weight:800}
+.tot-box .v.g{color:var(--green)}
+.tot-box .v.y{color:var(--yellow)}
+.tot-box .v.o{color:var(--orange)}
+.tot-box .v.r{color:var(--red)}
+
+/* ===== Preview Actions ===== */
+.preview-actions{display:flex;gap:8px;margin-top:10px}
+.preview-actions .btn{flex:1}
+
+/* ===== Zaitu Section ===== */
+.zt-box{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  padding:12px;margin-top:10px;
+}
+.zt-title{font-size:10px;font-weight:600;color:var(--text2);margin-bottom:10px;letter-spacing:.5px}
+.zt-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:6px;padding:3px 8px;font-size:11px;
+}
+.zt-chip .chip{border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;background:var(--accent-dim);color:var(--accent2)}
+.zt-chip .del{color:var(--red);cursor:pointer;font-size:10px}
+
+/* ===== Hints ===== */
+.no-data{text-align:center;color:var(--text3);font-size:13px;padding:24px}
+.notes{font-size:10px;color:var(--text3);margin-top:8px;line-height:1.7}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+</style>
+</head>
+<body>
+
+<h1>女装退货率计算器<span>抖音 · 路易小姐直播间</span></h1>
+
+<!-- 库存文件导入 -->
+<div class="card">
+  <div class="card-title"><span class="icon">📂</span>库存文件</div>
+  <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFile(event)">
+  <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+    <span>点击上传库存文件</span>
+    <span class="sub">支持 CSV / XLSX / XLS · 含商品编码、可用库存</span>
+  </div>
+  <div id="uploadStatus" class="status-bar"></div>
+  <div id="progressWrap">
+    <div id="progBar"><div id="progFill"></div></div>
+    <div id="progText"><span id="progLabel">解析中...</span><span id="progCount">0 / 0</span></div>
+  </div>
+</div>
+
+<!-- 订单文件导入 -->
+<div class="card">
+  <div class="card-title"><span class="icon">📦</span>订单文件</div>
+  <input type="file" id="orderFileInput" accept=".csv,.xlsx,.xls" onchange="handleOrderFile(event)">
+  <div class="upload-zone" onclick="document.getElementById('orderFileInput').click()">
+    <span>点击上传订单文件</span>
+    <span class="sub">支持 CSV / XLSX / XLS · 含商品编码、订单状态（已发货）、数量</span>
+  </div>
+  <div id="orderUploadStatus" class="status-bar"></div>
+</div>
+
+<!-- 手动添加 -->
+<div class="card">
+  <div class="card-title"><span class="icon">✏️</span>手动添加</div>
+  <div class="entry-grid" id="manualEntry">
+    <div>
+      <label>商品编码</label>
+      <input type="text" id="mCode" placeholder="款号，如 A001">
+    </div>
+    <div>
+      <label>尺码</label>
+      <select id="mSize">
+        <option value="F">F</option><option value="XXS">XXS</option><option value="XS">XS</option>
+        <option value="S">S</option><option value="M">M</option><option value="L">L</option>
+        <option value="XL">XL</option><option value="XXL">XXL</option><option value="XXXL">XXXL</option>
+      </select>
+    </div>
+    <div>
+      <label>库存</label>
+      <input type="number" id="mStock" placeholder="0" min="0">
+    </div>
+    <div>
+      <label>在途</label>
+      <input type="number" id="mZqtu" placeholder="0" min="0">
+    </div>
+    <div>
+      <label>退货率%</label>
+      <input type="number" id="mRate" value="55" min="0" max="100" step="0.1">
+    </div>
+    <div>
+      <label>已发</label>
+      <input type="number" id="mShipped" placeholder="0" min="0">
+    </div>
+    <div>
+      <label>天数</label>
+      <select id="mZtime">
+        <option value="1">48h</option><option value="2">7d</option>
+        <option value="3">15d</option><option value="4">25d</option>
+      </select>
+    </div>
+  </div>
+  <div class="preview-actions">
+    <button class="btn green" onclick="addManual()">添加到清单</button>
+    <button class="btn ghost" onclick="manualItems=[];renderManualList()">清空</button>
+  </div>
+</div>
+
+<!-- 搜索 & 列表 -->
+<div class="card">
+  <div class="card-title"><span class="icon">🔍</span>商品查询</div>
+  <div class="search-row">
+    <div class="search-wrap">
+      <span class="si">🔍</span>
+      <input type="text" id="codeSearch" placeholder="输入商品编码搜索..." oninput="onCodeSearch()">
+      <div class="search-count" id="searchCount"></div>
+    </div>
+    <select id="skuSel" onchange="selSKU()">
+      <option value="">— 选择商品编码 —</option>
+    </select>
+  </div>
+  <div id="noFileHint" class="no-data">先上传库存文件</div>
+  <div id="previewArea">
+    <div class="tbl-wrap">
+      <table class="tb" id="mainTable"><tbody></tbody></table>
+    </div>
+    <div class="tot-row" id="totArea" style="display:none">
+      <div class="tot-box"><div class="l">48h</div><div class="v g" id="pv48">0</div></div>
+      <div class="tot-box"><div class="l">7d</div><div class="v y" id="pv7">0</div></div>
+      <div class="tot-box"><div class="l">15d</div><div class="v o" id="pv15">0</div></div>
+      <div class="tot-box"><div class="l">合计</div><div class="v" id="pvTotal">0</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 预览区 -->
+<div id="previewDetail" style="display:none">
+  <div class="card">
+    <div class="card-title"><span class="icon">📊</span>批次明细 <span id="prevCode" style="font-weight:600;color:var(--text);margin-left:4px"></span></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;font-size:12px;color:var(--text2)">
+      <span>库存: <strong id="pvStock" style="color:var(--green)">0</strong></span>
+      <span>在途: <strong id="pvZaitu" style="color:var(--yellow)">0</strong></span>
+      <span>已发: <strong id="pvShipped" style="color:var(--orange)">0</strong></span>
+    </div>
+    <div class="tbl-wrap">
+      <table class="preview-table" id="previewTable"><tbody id="previewBody"></tbody></table>
+    </div>
+    <div class="preview-actions">
+      <button class="btn" onclick="addAllSizes()">添加到清单</button>
+    </div>
+  </div>
+</div>
+
+<!-- 清单汇总 -->
+<div class="card" id="manualCard" style="display:none">
+  <div class="card-title"><span class="icon">📋</span>已选清单</div>
+  <div class="tbl-wrap">
+    <table class="tb" id="manualTable"><tbody id="manualList"></tbody></table>
+  </div>
+  <div class="tot-row">
+    <div class="tot-box"><div class="l">48h</div><div class="v g" id="tot48">0</div></div>
+    <div class="tot-box"><div class="l">7d</div><div class="v y" id="tot7">0</div></div>
+    <div class="tot-box"><div class="l">15d</div><div class="v o" id="tot15">0</div></div>
+    <div class="tot-box"><div class="l">合计</div><div class="v" id="totAll">0</div></div>
+  </div>
+  <div class="notes" id="totNotes"></div>
+</div>
+
+</body>
+</html>

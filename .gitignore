@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Firebase (local cache, contains project config)
+.firebase/
+.firebase/
+.firebaserc.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+firebase-debug.log
+firebase-debug.*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts (keep feishu_rates.json and index.html)
+build.py
+
+# Environment (should not be committed)
+.env
+.env.local

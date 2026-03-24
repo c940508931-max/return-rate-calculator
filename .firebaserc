@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "lirunjisuanqi": {
+      "hosting": {
+        "lirun-calc": [
+          "lirun-calc"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

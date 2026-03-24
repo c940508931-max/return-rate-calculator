@@ -1,0 +1,3436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>女装退货率计算器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#0f0f0f;color:#fff;min-height:100vh;padding:16px}
+.cd{background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:12px}
+.tt{font-size:12px;font-weight:600;color:#9CA3AF;margin-bottom:8px;padding-top:12px}
+.tt:first-child{padding-top:0}
+input[type="file"]{display:none}
+label{display:block;background:#262626;border:1px dashed #444;border-radius:10px;padding:20px;text-align:center;cursor:pointer;font-size:13px;color:#6B7280;transition:border-color .2s}
+label:hover{border-color:#6366f1;color:#9CA3AF}
+input{background:#262626;border:1px solid #333;border-radius:8px;padding:8px 10px;font-size:14px;color:#fff;width:100%}
+input:focus{outline:none;border-color:#6366f1}
+input[type="number"]{-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type="text"]{text-align:left}
+select,select option{background:#262626;color:#fff}
+select{border:1px solid #333;border-radius:8px;padding:8px 10px;font-size:14px;width:100%;-webkit-appearance:none}
+select:focus{outline:none;border-color:#6366f1}
+.g{color:#22c55e}.r{color:#ef4444}.w{color:#eab308}.o{color:#fb923c}
+.bt{background:#6366f1;border:none;border-radius:10px;padding:12px;font-size:14px;color:#fff;cursor:pointer;width:100%;font-weight:600;margin-top:10px}
+.bt:active{opacity:0.8}
+.bt.g2{background:#22c55e}
+.bt.danger{background:#374151;color:#9CA3AF}
+.bt:disabled{opacity:0.4;cursor:not-allowed}
+.tb{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px}
+.tb th{font-size:11px;color:#6B7280;padding:5px 6px;text-align:left;font-weight:500;border-bottom:1px solid #2a2a2a;position:sticky;top:0;background:#1a1a1a}
+.tb th.r{text-align:right}
+.tb td{font-size:12px;padding:6px 6px;border-bottom:1px solid #262626;color:#fff}
+.tb td.r{text-align:right}
+.tb td.n{color:#6B7280}
+.tb tr:last-child td{border-bottom:none}
+.tbl-wrap{max-height:500px;overflow-y:auto;border-radius:8px;border:1px solid #2a2a2a}
+.fl{display:flex;gap:8px;margin-bottom:8px}
+.fl>*{flex:1}
+.hint,.ok,.err{font-size:12px;text-align:center;margin-top:6px}
+.ok{color:#22c55e}
+.err{color:#ef4444}
+.hint{color:#6B7280}
+.del{cursor:pointer;color:#ef4444;font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.1)}
+.del:hover{background:rgba(239,68,68,.2)}
+#progressWrap{margin-top:10px}
+#progText{font-size:11px;color:#6B7280;margin-bottom:4px;display:flex;justify-content:space-between}
+#progBar{background:#262626;border-radius:6px;height:6px;overflow:hidden}
+#progFill{height:100%;background:#6366f1;border-radius:6px;transition:width .1s;width:0%}
+.mt{font-size:11px;color:#6B7280;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.search-wrap{position:relative}
+.search-wrap input{padding-left:32px;text-align:left}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#6B7280;pointer-events:none;font-size:14px}
+.search-count{font-size:10px;color:#6B7280;margin-top:4px;text-align:right;min-height:14px}
+.batch-chip{border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;display:inline-block}
+.chip-48h{background:rgba(34,197,94,.2);color:#22c55e}
+.chip-7d{background:rgba(234,179,8,.2);color:#eab308}
+.chip-15d{background:rgba(251,146,60,.2);color:#fb923c}
+.chip-25d{background:rgba(239,68,68,.2);color:#ef4444}
+.size-tag{font-size:10px;padding:1px 5px;border-radius:3px;background:#333;color:#9CA3AF;margin-left:4px}
+.size-name{font-weight:600;font-size:13px}
+#previewArea{margin-top:12px}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px}
+.preview-table th{font-size:10px;color:#6B7280;padding:5px 8px;text-align:center;font-weight:500;border-bottom:1px solid #333;background:#1e1e2e}
+.preview-table th:first-child{text-align:left}
+.preview-table td{font-size:12px;padding:6px 8px;border-bottom:1px solid #262626;text-align:center;color:#fff}
+.preview-table td:first-child{text-align:left}
+.preview-table tr:last-child td{border-bottom:none}
+.rate-input{background:#262626;border:1px solid #333;border-radius:6px;padding:3px 6px;font-size:12px;color:#fff;width:60px;text-align:center}
+.rate-input:focus{outline:none;border-color:#6366f1}
+.num-input{background:#262626;border:1px solid #333;border-radius:6px;padding:3px 6px;font-size:12px;color:#fff;width:70px;text-align:center}
+.num-input:focus{outline:none;border-color:#6366f1}
+.time-select{background:#262626;border:1px solid #333;border-radius:6px;padding:3px 6px;font-size:12px;color:#fff;width:80px}
+.time-select:focus{outline:none;border-color:#6366f1}
+.preview-actions{display:flex;gap:8px;margin-top:10px}
+.preview-actions button{flex:1}
+.size-row td{background:#1c1c1c;padding:4px 6px!important;font-size:11px!important;color:#9CA3AF}
+.size-row td:first-child{padding-left:20px!important}
+.code-row td{font-weight:600}
+.list-row{cursor:pointer;transition:background .15s}
+.list-row:hover td{background:#2a2a3e!important}
+.list-row.selected td{background:#3a3a5c!important}
+.list-row.selected td:first-child{border-left:3px solid #6366f1}
+.toggle-btn{cursor:pointer;font-size:11px;color:#6366f1;margin-right:6px;user-select:none}
+.toggle-btn:hover{color:#818cf8}
+.tot-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:10px}
+.tot-box{background:#1e1e2e;border:1px solid #333;border-radius:10px;padding:12px;text-align:center}
+.tot-box .l{font-size:10px;color:#6B7280;margin-bottom:4px}
+.tot-box .v{font-size:18px;font-weight:700}
+.tot-box .v.g{color:#22c55e}
+.tot-box .v.y{color:#eab308}
+.tot-box .v.o{color:#fb923c}
+.tot-box .v.r2{color:#ef4444}
+.notes{font-size:10px;color:#6B7280;margin-top:8px;line-height:1.6}
+.notes span{display:block}
+.no-data{text-align:center;color:#555;font-size:13px;padding:20px}
+
+/* 在途库存区域 */
+.zaitu-box{background:#1e1e2e;border:1px solid #333;border-radius:10px;padding:12px;margin-top:10px}
+.zaitu-box .zt-title{font-size:11px;color:#9CA3AF;font-weight:600;margin-bottom:8px}
+.zt-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.zt-row>*{flex:none}
+.zt-label{font-size:11px;color:#6B7280;min-width:52px}
+.zt-num{width:80px}
+.zt-sel{width:90px}
+.zt-add{background:#6366f1;border:none;border-radius:8px;padding:5px 12px;font-size:12px;color:#fff;cursor:pointer;flex:none}
+.zt-add:hover{background:#4f46e5}
+.zt-list{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.zt-item{display:flex;align-items:center;gap:4px;background:#262626;border:1px solid #333;border-radius:6px;padding:3px 8px;font-size:11px}
+.zt-item .zt-chip{border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600}
+.zt-item .zt-del{color:#ef4444;cursor:pointer;margin-left:2px;font-size:10px}
+
+/* 在途小计行 */
+.zaitu-sub-row td{background:#1a1a2a;font-size:11px!important;color:#818cf8!important;font-weight:600;border-top:1px dashed #333}
+
+/* 尺码行内的在途输入 */
+.zaitu-inline{display:flex;gap:3px;align-items:center;justify-content:center}
+.zaitu-inline input{width:52px!important;padding:2px 4px!important;font-size:11px!important;height:22px}
+.zaitu-inline select{width:68px!important;padding:2px 4px!important;font-size:11px!important;height:22px}
+.zt-chip-inline{border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600;background:rgba(129,140,248,.2);color:#818cf8}
+.batch-rate-bar{display:flex;gap:8px;align-items:center;background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:8px 12px}
+.batch-rate-bar .br-lbl{font-size:11px;color:#9CA3AF;white-space:nowrap;flex:none}
+.batch-rate-bar input{width:80px!important;flex:none}
+.batch-rate-bar button{width:auto!important;flex:none;margin-top:0;padding:5px 14px;font-size:12px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:20px;font-size:12px;z-index:1000;display:none;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+</style>
+</head>
+<body>
+<div style="text-align:center;padding:10px 16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);border-radius:10px;margin-bottom:14px">
+  <span style="font-size:13px;font-weight:700;color:#ef4444;text-shadow:0 0 8px #ef4444,0 0 16px rgba(239,68,68,.5)">⚠️ 提示：必须先导入<strong>已发订单文件</strong>，再导入<strong>库存文件</strong>，已发库存才能正确显示</span>
+</div>
+
+<div class="cd">
+  <div class="tt">📂 本地库存文件导入</div>
+  <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFile(event)">
+  <label for="fileInput">📁 点击上传库存 CSV 或 Excel 文件<br><span style="font-size:11px;color:#555;margin-top:4px;display:block">支持 .csv / .xlsx / .xls，需包含：商品编码、商品条码、可用库存、在途库存（选填）｜退货率自动从飞书「有货退」（共2256条）匹配</span></label>
+  <div id="uploadStatus" style="display:none"></div>
+  <div id="feishuStatus" style="font-size:11px;margin-top:6px;color:#22c55e">✓ 飞书退货率已就绪（共 2256 条）</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+    <button id="refreshFeishuBtn" onclick="refreshFeishuRates()" style="background:#262626;border:1px solid #444;border-radius:6px;padding:4px 10px;font-size:11px;color:#9CA3AF;cursor:pointer">🔄 更新有货退</button>
+    <span id="feishuUpdateTime" style="font-size:10px;color:#555"></span>
+  </div>
+  <div id="progressWrap" style="display:none">
+    <div id="progText" style="display:flex;justify-content:space-between;font-size:11px;color:#6B7280;margin-bottom:4px">
+      <span id="progLabel">解析中...</span>
+      <span id="progCount">0 / 0</span>
+    </div>
+    <div id="progBar" style="background:#262626;border-radius:6px;height:6px">
+      <div id="progFill" style="height:100%;background:#6366f1;border-radius:6px;transition:width .1s"></div>
+    </div>
+  </div>
+</div>
+
+<div class="cd">
+  <div class="tt">📦 订单导入（已发货统计）</div>
+  <input type="file" id="orderFileInput" accept=".csv,.xlsx,.xls" onchange="handleOrderFile(event)">
+  <label for="orderFileInput">📦 点击上传订单 CSV 或 Excel 文件<br><span style="font-size:11px;color:#555;margin-top:4px;display:block">需包含：商品编码、订单状态（填"已发货"）、数量（按商品编码+尺码归类）</span></label>
+  <div id="orderUploadStatus"></div>
+</div>
+
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+    <div style="flex:1;min-width:90px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">商品编码</div>
+      <input type="text" id="mCode" placeholder="如：A001" style="font-size:13px">
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">尺码</div>
+      <select id="mSize" style="font-size:13px">
+        <option value="F">F</option>
+        <option value="XXS">XXS</option>
+        <option value="XS">XS</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+        <option value="XXL">XXL</option>
+        <option value="XXXL">XXXL</option>
+      </select>
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">库存</div>
+      <input type="number" id="mStock" placeholder="0" min="0" style="font-size:13px">
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">在途</div>
+      <input type="number" id="mZqtu" placeholder="0" min="0" style="font-size:13px">
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">退货率%</div>
+      <input type="number" id="mRate" placeholder="55" min="0" max="100" step="0.1" value="55" style="font-size:13px">
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">已发</div>
+      <input type="number" id="mShipped" placeholder="0" min="0" style="font-size:13px">
+    </div>
+    <div style="flex:none">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">发货时间</div>
+      <select id="mZtime" style="font-size:13px;width:70px">
+        <option value="2">7d</option>
+        <option value="1">48h</option>
+        <option value="3">15d</option>
+        <option value="4">25d</option>
+      </select>
+    </div>
+    <div style="flex:none">
+      <button class="bt" onclick="addManualRow()" style="margin-top:0;padding:7px 14px;font-size:13px">+ 添加</button>
+    </div>
+  </div>
+  <div id="manualList" style="margin-top:10px"></div>
+</div>
+
+<div class="cd">
+  <div class="tt">🔍 选择商品编码查看尺码</div>
+  <div class="search-wrap" id="searchWrap" style="display:none">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="codeSearch" placeholder="输入商品编码搜索..." oninput="onCodeSearch()">
+    <div class="search-count" id="searchCount"></div>
+  </div>
+  <select id="skuSel" onchange="selSKU()"><option value="">— 先上传文件 —</option></select>
+  <div id="previewArea" style="display:none">
+    <div class="batch-rate-bar" style="margin-bottom:10px">
+      <span class="br-lbl">📐 批量设置退货率（该款所有尺码）：</span>
+      <input type="number" id="batchRateInput" placeholder="55" min="0" max="100" step="0.1" value="55" style="font-size:13px">
+      <button class="bt" onclick="applyBatchRate()" style="margin-top:0;padding:5px 14px;font-size:13px">应用</button>
+    </div>
+    <div class="tbl-wrap" style="max-height:350px">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>尺码</th>
+            <th>库存</th>
+            <th>在途</th>
+            <th>已发</th>
+            <th>退货率</th>
+            <th>48h</th>
+            <th>7d</th>
+            <th>15d</th>
+            <th>25d</th>
+          </tr>
+        </thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+
+    <div id="previewTotals" style="background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:10px 12px;margin-top:10px">
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">可用库存</div>
+          <div style="font-size:16px;font-weight:700" id="pvStock">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">在途库存</div>
+          <div style="font-size:16px;font-weight:700;color:#818cf8" id="pvZaitu">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">已发库存</div>
+          <div style="font-size:16px;font-weight:700;color:#fb923c" id="pvShipped">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">48h可发</div>
+          <div style="font-size:16px;font-weight:700;color:#22c55e" id="pv48">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">7d可发</div>
+          <div style="font-size:16px;font-weight:700;color:#eab308" id="pv7">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">15d可发</div>
+          <div style="font-size:16px;font-weight:700;color:#fb923c" id="pv15">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">25d可发</div>
+          <div style="font-size:16px;font-weight:700;color:#ef4444" id="pv25">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">总可发</div>
+          <div style="font-size:16px;font-weight:700;color:#fff" id="pvTotal">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="preview-actions">
+      <button class="bt g2" id="addAllBtn" onclick="addAllSizes()">✓ 添加到清单</button>
+      <button class="bt danger" onclick="clearPreview()">清空</button>
+    </div>
+  </div>
+  <div id="noFileHint" class="no-data">上传文件后即可选择商品编码</div>
+</div>
+
+<div class="cd">
+  <div class="tt">📋 计算清单 <span id="cnt" style="font-weight:400;color:#6B7280"></span></div>
+  <div class="tbl-wrap">
+    <table class="tb">
+      <thead>
+        <tr>
+          <th>商品编码</th>
+          <th>尺码</th>
+          <th class="r">库存</th>
+          <th class="r">在途</th>
+          <th class="r">已发</th>
+          <th>发货</th>
+          <th class="r">退货率</th>
+          <th class="r">48h</th>
+          <th class="r">7d</th>
+          <th class="r">15d</th>
+          <th class="r">25d</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+  <div id="detailArea" style="display:none;margin-top:8px"></div>
+  <div id="totArea" style="display:none">
+    <div class="tot-grid">
+      <div class="tot-box"><div class="l">合计可用库存</div><div class="v" id="totStock">0</div></div>
+      <div class="tot-box"><div class="l">合计在途</div><div class="v" id="totZaitu">0</div></div>
+      <div class="tot-box"><div class="l">合计已发</div><div class="v o" id="totShipped">0</div></div>
+      <div class="tot-box"><div class="l">合计48h</div><div class="v g" id="tot48">0</div></div>
+      <div class="tot-box"><div class="l">合计7d</div><div class="v y" id="tot7">0</div></div>
+    </div>
+    <div class="tot-grid" style="margin-top:8px">
+      <div class="tot-box"><div class="l">合计15d</div><div class="v o" id="tot15">0</div></div>
+      <div class="tot-box"><div class="l">合计25d</div><div class="v r2" id="tot25">0</div></div>
+      <div class="tot-box"><div class="l">最大总可发</div><div class="v" id="totTotal">0</div></div>
+      <div class="tot-box"><div class="l">平均退货率</div><div class="v" id="totAvgRate">—</div></div>
+    </div>
+  </div>
+  <button class="bt danger" onclick="clearList()" style="margin-top:8px" id="clearBtn" disabled>🗑 清空清单</button>
+  <button class="bt export" onclick="exportExcel()" id="exportBtn" disabled style="margin-top:8px">📤 导出 Excel</button>
+  <div class="notes">
+    <span>💡 <strong>逻辑：</strong>可用库存：48h发，退回进入7d→15d→25d循环。在途库存：进入指定批次，如选7天则直接作为7d发货，退回进15d→25d</span>
+  </div>
+</div>
+
+<div class="cd">
+  <div class="tt">📖 尺码参照（条码末位）</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <span class="mt">0 → F</span>
+    <span class="mt">1 → XXS</span>
+    <span class="mt">2 → XS</span>
+    <span class="mt">3 → S</span>
+    <span class="mt">4 → M</span>
+    <span class="mt">5 → L</span>
+    <span class="mt">6 → XL</span>
+    <span class="mt">7 → XXL</span>
+    <span class="mt">8 → XXXL</span>
+  </div>
+</div>
+
+<script>
+var SIZE_MAP = {0:'F',1:'XXS',2:'XS',3:'S',4:'M',5:'L',6:'XL',7:'XXL',8:'XXXL'};
+var TIME_MAP = {1:'48h', 2:'7d', 3:'15d', 4:'25d'};
+
+// 飞书表格「有货退」数据（来自 路易项目款式数据总计 sheet_id=5c7d0c）
+// 款号 → 退货率(%)；此数据由鲨鱼维护，有变动请叫鲨鱼更新
+var FEISHU_RETURN_RATES = {
+"DU221q200001p2030":74.5,
+"DU221q200001p2040":55.6,
+"DU221q200002p0230":62.3,
+"DU221q200003p4030":61.1,
+"DU221q200005p1130":49.6,
+"DU221q200006p3730":69.3,
+"DU221q200007p1030":70.6,
+"DU221q200008p2053":62.5,
+"DU221q2000145p3720":47.1,
+"DU221q200014p0130":71.4,
+"DU221q200016p1030":0.0,
+"DU221q200023p2030":75.0,
+"DU221q200028p2030":66.7,
+"DU221q200029p3730":79.2,
+"DU221q200030p0130":100.0,
+"DU221q200031p4050":100.0,
+"DU221q200032p0130":100.0,
+"DU221q200035p2230":66.7,
+"DU221q200039p1030":80.0,
+"DU221q200040p3710":50.0,
+"DU221q200043p1030":20.0,
+"DU221q200046p1030":50.0,
+"DU221q200047p2010":44.6,
+"DU221q200055p4020":64.7,
+"DU221q200056p1160":100.0,
+"DU221q200057p1030":65.3,
+"DU221q200057p1040":66.6,
+"DU221q200058p1010":51.6,
+"DU221q200062p1520":50.0,
+"DU221q200063p2170":27.3,
+"DU221q200064p0270":50.0,
+"DU221q200067p0170":66.7,
+"DU222q2000147p0110":58.3,
+"DU222q2000149p1030":0.0,
+"DU222q2000150p2030":65.3,
+"DU222q2000154p4070":62.0,
+"DU222q2000158p2010":100.0,
+"DU222q2000159p1030":100.0,
+"DU222q2000162p0240":100.0,
+"DU222q2000170p2430":41.7,
+"DU222q2000171p1530":0.0,
+"DU222q2000172p2010":100.0,
+"DU222q2000173p1030":50.0,
+"DU222q2000174p0230":78.8,
+"DU222q2000177p0111":79.5,
+"DU222q2000178p2010":69.4,
+"DU222q2000178p2060":54.7,
+"DU222q200068p1000":100.0,
+"DU222q200071p4030":100.0,
+"DU222q200071p4080":71.4,
+"DU222q200072p0130":33.3,
+"DU222q200073p1030":66.7,
+"DU222q200074p2170":69.2,
+"DU222q200075p4001":62.9,
+"DU222q200076p0130":51.6,
+"DU222q200077p2010":45.5,
+"DU222q200077p2030":100.0,
+"DU222q200078p1030":33.3,
+"DU222q200078p1060":12.5,
+"DU222q200083p4030":66.7,
+"DU222q200084p4010":100.0,
+"DU222q200084p4030":50.0,
+"DU222q200092p1101":50.0,
+"DU222q200093p2030":71.4,
+"DU222q200102p1020":61.9,
+"DU222q200104p4030":46.1,
+"DU222q200105p0130":100.0,
+"DU222q200106p0151":38.4,
+"DU222q200108p4030":61.4,
+"DU222q200109p0130":62.0,
+"DU222q200111p4030":77.3,
+"DU222q200116p0130":20.0,
+"DU222q200119p4020":40.9,
+"DU222q200120p0130":50.0,
+"DU222q200136p1011":100.0,
+"DU222q200137p1030":67.9,
+"DU222q200138p0130":100.0,
+"DU222q200139p1030":61.3,
+"DU222q200140p1001":41.7,
+"DU222q200141p1001":100.0,
+"DU222q200142p3070":66.7,
+"DU222q200143p0120":55.8,
+"DU222q200148p0230":36.3,
+"DU222q200156p1110":55.4,
+"DU222q200180p1050":0.0,
+"DU222q200181p1030":82.6,
+"DU222q200185p2410":46.2,
+"DU222q200186p1010":69.2,
+"DU222q200191p1101":53.3,
+"DU222q200195p0102":70.1,
+"DU222q200198p2030":48.3,
+"DU222q200199p2430":60.0,
+"DU222q200200p0230":49.3,
+"DU222q200209p3730":88.9,
+"DU222q200210p1140":100.0,
+"DU222q200211p0101":57.9,
+"DU222q200213p4060":100.0,
+"DU222q200216p0140":100.0,
+"DU222q200217p1430":49.4,
+"DU222q200226p2030":53.0,
+"DU222q200227p2030":60.0,
+"DU222q200229p2030":100.0,
+"DU222q200230p0130":58.1,
+"DU222q200231p2030":60.8,
+"DU222q200232p1154":53.3,
+"DU222q200233p3030":43.8,
+"DU222q200235p4054":52.9,
+"DU222q200236p0110":58.1,
+"DU222q200236p0130":45.0,
+"DU222q200236p0142":60.4,
+"DU222q200237p1011":57.5,
+"DU222q200237p1054":50.2,
+"DU222q200237p1060":46.4,
+"DU222q200239p1010":45.0,
+"DU222q200242p3754":90.0,
+"DU222q200243p0254":61.1,
+"DU222q200245p1054":41.2,
+"DU222q200248p4060":69.2,
+"DU222q200253p2030":56.3,
+"DU222q200254p3030":38.1,
+"DU222q200255p1010":71.8,
+"DU222q200256p3740":49.2,
+"DU222q200257p2030":52.2,
+"DU222q200268p0130":40.8,
+"DU222q200271p4030":61.7,
+"DU222q200271p4060":46.1,
+"DU222q200272p3602":63.6,
+"DU222q200273p2410":60.6,
+"DU222q200274p1430":40.0,
+"DU222q200274p1440":50.0,
+"DU222q200274p1490":46.5,
+"DU222q200277p0102":46.2,
+"DU222q200279p2010":100.0,
+"DU222q200280p2402":51.5,
+"DU222q200281p1510":50.0,
+"DU222q200281p1530":100.0,
+"DU222q200282p1030":43.9,
+"DU222q200283p3190":46.1,
+"DU222q200284p0130":68.2,
+"DU222q200286p1430":38.1,
+"DU222q200286p1440":54.8,
+"DU222q200303p3002":53.6,
+"DU222q200307p3030":59.9,
+"DU222q200308p3030":44.4,
+"DU222q200310p1030":61.9,
+"DU222q200311p2030":79.6,
+"DU222q200312p3010":54.0,
+"DU222q200312p3060":74.4,
+"DU222q200313p3030":0.0,
+"DU222q200316p2010":50.0,
+"DU222q200316p2030":67.9,
+"DU222q200316p2043":76.5,
+"DU223q200319p3610":0.0,
+"DU223q200320p3720":50.0,
+"DU223q200321p3060":63.5,
+"DU223q200322p4060":50.2,
+"DU223q200323p0230":33.3,
+"DU223q200325p3030":57.4,
+"DU223q200326p2230":44.3,
+"DU223q200328p1502":66.7,
+"DU223q200328p1530":55.6,
+"DU223q200328p1543":42.9,
+"DU223q200329p1510":44.4,
+"DU223q200329p1530":57.6,
+"DU223q200330p2030":49.7,
+"DU223q200331p3010":25.0,
+"DU223q200333p3230":55.7,
+"DU223q200335p1430":48.5,
+"DU223q200338p1410":60.0,
+"DU223q200338p1430":66.7,
+"DU223q200339p0230":58.3,
+"DU223q200340p3230":72.0,
+"DU223q200342p3202":53.8,
+"DU223q200343p4002":55.6,
+"DU223q200344p3030":58.6,
+"DU223q200346p3130":64.3,
+"DU223q200346p3190":66.7,
+"DU223q200348p0230":57.4,
+"DU223q200349p1530":100.0,
+"DU223q200350p2002":54.2,
+"DU223q200350p2030":43.6,
+"DU223q200351p3630":45.8,
+"DU223q200351p3692":42.4,
+"DU223q200352p4030":54.7,
+"DU223q200355p1002":36.1,
+"DU223q200356p3040":48.4,
+"DU223q200358p1010":50.5,
+"DU223q200358p1020":35.7,
+"DU223q200358p1057":42.2,
+"DU223q200358p1091":0.0,
+"DU223q200358p1093":62.5,
+"DU223q200359p2030":100.0,
+"DU223q200360p0130":67.5,
+"DU223q200362p1030":14.5,
+"DU223q200363p3130":47.6,
+"DU223q200365p4054":49.2,
+"DU223q200365p4091":42.9,
+"DU223q200368p1030":40.3,
+"DU223q200369p1092":33.3,
+"DU223q200370p1354":29.3,
+"DU223q200371p3254":42.0,
+"DU223q200376p0191":63.9,
+"DU223q200377p2030":66.7,
+"DU223q200379p0130":22.2,
+"DU223q200380p3030":47.3,
+"DU223q200381p3630":49.7,
+"DU223q200382p3130":100.0,
+"DU223q200382p3190":100.0,
+"DU223q200385p0130":48.3,
+"DU223q200387p0230":52.6,
+"DU223q200387p0240":59.6,
+"DU223q200388p0160":70.8,
+"DU223q200389p0130":44.8,
+"DU223q200390p1110":60.3,
+"DU223q200391p4090":47.1,
+"DU223q200392p3202":48.6,
+"DU223q200393p3330":53.3,
+"DU223q200394p0130":51.4,
+"DU223q200394p0140":47.6,
+"DU223q200395p3060":66.7,
+"DU223q200396p4030":77.3,
+"DU223q200397p4030":35.5,
+"DU223q200398p3330":29.9,
+"DU223q200398p3340":50.2,
+"DU223q200399p3330":25.7,
+"DU223q200401p3240":52.9,
+"DU223q200402p3091":43.0,
+"DU223q200404p3330":100.0,
+"DU223q200405p3212":54.3,
+"DU223q200406p1530":51.2,
+"DU223q200407p0130":57.1,
+"DU224q200409p2430":59.3,
+"DU224q200409p2440":48.8,
+"DU224q200410p1110":81.8,
+"DU224q200411p4081":62.3,
+"DU224q200412p2030":42.7,
+"DU224q200413p3230":39.8,
+"DU224q200414p4002":64.1,
+"DU224q200415p2010":56.2,
+"DU224q200415p2030":60.1,
+"DU224q200416p2030":53.9,
+"DU224q200417p0230":41.7,
+"DU224q200418p4040":50.8,
+"DU224q200420p1520":56.0,
+"DU224q200420p1530":49.4,
+"DU224q200420p1591":51.3,
+"DU224q200421p4030":32.2,
+"DU224q200422p0230":57.5,
+"DU224q200423p3280":52.2,
+"DU224q200425p3030":60.2,
+"DU224q200426p3230":52.4,
+"DU224q200428p1110":20.0,
+"DU224q200430p0130":66.6,
+"DU224q200431p2030":47.6,
+"DU224q200432p3030":59.2,
+"DU224q200434p0230":57.8,
+"DU224q200437p4023":61.1,
+"DU224q200438p3030":47.8,
+"DU224q200442p0130":56.8,
+"DU224q200446p0130":66.7,
+"DU224q200447p4030":61.8,
+"DU224q200448p3280":64.5,
+"DU224q200449p1130":85.1,
+"DU224q200451p0140":49.5,
+"DU224q200452p1530":36.1,
+"DU224q200453p1102":45.7,
+"DU224q200453p1110":46.6,
+"DU224q200455p3030":45.2,
+"DU224q200456p1110":51.5,
+"DU224q200457p4030":27.1,
+"DU224q200461p4040":61.0,
+"DU224q200462p0130":39.4,
+"DU224q200463p0130":51.8,
+"DU224q200467p0202":56.3,
+"DU224q200469p0240":84.0,
+"DU224q200473p4010":51.7,
+"DU224q200475p1091":51.9,
+"DU224q200475p1130":39.3,
+"DU224q200475p1140":53.3,
+"DU224q200475p1180":50.6,
+"DU224q200476p0230":63.0,
+"DU224q200477p3330":29.5,
+"DU224q200478p1540":49.4,
+"DU224q200481p1530":55.1,
+"DU224q200482p0230":49.3,
+"DU224q200486p3010":58.7,
+"DU224q200487p0130":41.5,
+"DU224q200489p3291":45.5,
+"DU224q200490p3030":41.9,
+"DU224q200491p3230":32.0,
+"DU224q200492p0243":25.0,
+"DU224q200493p2030":56.6,
+"DU224q200494p0130":33.8,
+"DU224q200494p0140":51.3,
+"DU224q200495p1080":71.2,
+"DU224q200496p3030":50.9,
+"DU224q200497p0130":55.7,
+"DU224q200498p1130":40.7,
+"DU224q200502p1030":33.7,
+"DU224q200503p0230":45.0,
+"DU224q200504p2040":50.1,
+"DU224q200504p2060":59.5,
+"DU224q200507p1030":49.0,
+"DU224q200508p0230":46.0,
+"DU224q200509p2010":68.7,
+"DU224q200512p1510":62.3,
+"DU224q200517p3710":52.8,
+"DU224q200520p4030":50.0,
+"DU224q200522p4060":63.8,
+"DU224q200523p0210":61.2,
+"DU224q200523p0230":59.1,
+"DU224q200527p3010":61.2,
+"DU224q200538p1030":59.8,
+"DU224q200539p0230":60.7,
+"DU224q200540p4030":46.4,
+"DU224q200544p4030":58.4,
+"DU224q200547p0130":52.9,
+"DU224q200547p0140":60.6,
+"DU224q200548p1110":47.1,
+"DU224q200549p2040":66.3,
+"DU231q10002p0130":44.3,
+"DU231q10003p0141":44.1,
+"DU231q10005p1112":52.7,
+"DU231q10005p1130":46.7,
+"DU231q10005p1140":44.8,
+"DU231q10006p1130":39.9,
+"DU231q10006p1142":47.4,
+"DU231q10007p0230":47.3,
+"DU231q10007p0240":52.9,
+"DU231q10008p2010":74.3,
+"DU231q10009p3080":52.6,
+"DU231q10011p2030":70.4,
+"DU231q10012p1130":67.3,
+"DU231q10014p1030":50.9,
+"DU231q10016p0212":47.4,
+"DU231q10017p0130":48.4,
+"DU231q10017p0150":53.1,
+"DU231q10021p3710":40.2,
+"DU231q10022p1030":46.1,
+"DU231q10027p4030":48.4,
+"DU231q10028p0111":72.4,
+"DU231q10030p4011":48.7,
+"DU231q10033p2030":64.1,
+"DU231q10033p2050":63.7,
+"DU231q10034p4030":54.6,
+"DU231q10035p4054":58.7,
+"DU231q10036p4002":51.7,
+"DU231q10039p1030":56.7,
+"DU231q10051p3030":48.0,
+"DU231q10053p1191":52.8,
+"DU231q10054p2010":53.4,
+"DU231q10054p2030":62.7,
+"DU231q10055p0230":50.2,
+"DU231q10057p2042":63.9,
+"DU231q10058p1180":53.1,
+"DU231q10059p0130":60.7,
+"DU231q10060p1110":66.5,
+"DU231q10060p1142":52.8,
+"DU231q10061p0280":53.7,
+"DU231q10062p1030":52.7,
+"DU231q10062p1040":46.6,
+"DU231q10062p1042":49.6,
+"DU231q10062p1092":48.5,
+"DU231q10065p4050":40.9,
+"DU231q10067p3742":42.5,
+"DU231q10068p1520":40.6,
+"DU231q10068p1530":40.6,
+"DU231q10070p1010":53.8,
+"DU231q10071p2470":43.0,
+"DU231q10074p1530":53.1,
+"DU231q10074p1540":50.9,
+"DU231q10075p0130":40.8,
+"DU231q10080p2012":48.1,
+"DU231q10080p2060":49.7,
+"DU231q10084p0130":49.4,
+"DU231q10084p4070":55.6,
+"DU231q10087p0230":69.5,
+"DU231q10087p0242":52.9,
+"DU231q10090p4040":49.9,
+"DU231q10091p1020":52.0,
+"DU231q10091p1042":55.0,
+"DU231q10091p1043":46.7,
+"DU231q10092p2020":55.1,
+"DU231q10092p2043":59.1,
+"DU231q10093p1080":52.4,
+"DU231q10094p3730":53.0,
+"DU231q10095p0110":52.9,
+"DU231q10096p1010":53.8,
+"DU231q10098p1040":48.2,
+"DU231q10100p0230":64.1,
+"DU231q10101p1142":71.8,
+"DU231q10102p1030":67.2,
+"DU231q10104p0230":57.6,
+"DU231q10105p2030":57.5,
+"DU231q10105p2040":51.3,
+"DU231q10106p1530":45.1,
+"DU231q10106p1557":50.3,
+"DU231q10106p1580":45.6,
+"DU231q10108p2030":67.0,
+"DU231q10109p1630":53.9,
+"DU231q10110p1530":62.9,
+"DU231q10112p2030":67.1,
+"DU231q10113p3730":53.7,
+"DU231q10115p0130":64.9,
+"DU231q10116p0130":57.9,
+"DU231q10117p1080":49.9,
+"DU231q10118p0130":65.0,
+"DU231q10120p1030":46.0,
+"DU231q10121p1030":46.5,
+"DU231q10122p1044":62.8,
+"DU231q10122p1050":56.1,
+"DU231q10122p1054":57.4,
+"DU231q10122p1060":57.2,
+"DU231q10122p1073":58.1,
+"DU231q10122p1080":44.5,
+"DU231q10124p1170":44.2,
+"DU231q10125p0130":38.4,
+"DU231q10127p1030":51.9,
+"DU231q10128p0130":59.7,
+"DU231q10129p0130":51.1,
+"DU231q10133p1102":56.1,
+"DU231q10134p0150":51.7,
+"DU231q10135p3770":49.3,
+"DU231q10136p1170":43.5,
+"DU231q10137p2030":53.4,
+"DU231q10139p1530":63.0,
+"DU231q10141p1130":62.6,
+"DU231q10142p4070":43.7,
+"DU231q10143p1002":51.4,
+"DU231q10144p3070":45.2,
+"DU231q10145p3030":47.2,
+"DU231q10146p0130":56.6,
+"DU231q10147p3730":43.9,
+"DU231q10148p0230":44.9,
+"DU231q10151p0130":45.6,
+"DU231q10152p4040":42.9,
+"DU231q10153p0230":52.1,
+"DU231q10154p0230":51.7,
+"DU231q10155p0130":44.2,
+"DU231q10156p1110":42.8,
+"DU231q10157p0140":56.0,
+"DU231q10158p0140":51.4,
+"DU232q10159p0102":51.0,
+"DU232q10159p0180":38.6,
+"DU232q10160p1030":59.0,
+"DU232q10164p1030":48.6,
+"DU232q10165p1002":37.9,
+"DU232q10171p1011":46.5,
+"DU232q10172p0130":48.7,
+"DU232q10173p0230":52.7,
+"DU232q10177p0130":48.6,
+"DU232q10178p4030":53.5,
+"DU232q10179p3130":43.3,
+"DU232q10180p1030":51.4,
+"DU232q10181p1030":45.6,
+"DU232q10182p1010":41.8,
+"DU232q10183p1030":47.3,
+"DU232q10184p4030":52.5,
+"DU232q10184p4060":51.2,
+"DU232q10186p2030":59.9,
+"DU232q10190p0102":46.8,
+"DU232q10191p4091":45.4,
+"DU232q10193p1110":42.7,
+"DU232q10194p0230":51.2,
+"DU232q10195p1530":41.9,
+"DU232q10197p1040":62.3,
+"DU232q10209p1051":51.7,
+"DU232q10211p1030":48.0,
+"DU232q10215p1130":42.0,
+"DU232q10216p1130":39.7,
+"DU232q10217p0130":42.9,
+"DU232q10222p1010":40.7,
+"DU232q10222p1040":42.7,
+"DU232q10226p1130":45.4,
+"DU232q10227p0130":38.9,
+"DU232q10228p2430":33.5,
+"DU232q10229p1102":42.3,
+"DU232q10230p0100":49.2,
+"DU232q10233p0200":46.2,
+"DU232q10237p3730":40.4,
+"DU232q10238p0230":46.6,
+"DU232q10239p1030":47.2,
+"DU232q10245p3730":45.5,
+"DU232q10246p1002":49.8,
+"DU232q10246p1030":48.8,
+"DU232q10247p0130":42.9,
+"DU232q10249p3610":43.8,
+"DU232q10249p3630":38.2,
+"DU232q10250p1530":38.9,
+"DU232q10252p0211":44.5,
+"DU232q10256p1002":49.3,
+"DU232q10257p4030":50.0,
+"DU232q10258p0240":52.1,
+"DU232q10260p1030":41.6,
+"DU232q10261p1630":47.0,
+"DU232q10271p2030":57.8,
+"DU232q10274p0180":57.4,
+"DU232q10276p4060":59.1,
+"DU232q10278p4080":50.4,
+"DU232q10279p4070":46.1,
+"DU232q10280p3180":44.0,
+"DU232q10281p3243":45.5,
+"DU232q10283p0141":45.6,
+"DU232q10296p1030":50.9,
+"DU232q10298p1042":53.5,
+"DU232q10300p1040":56.3,
+"DU232q10301p1030":42.7,
+"DU232q10304p1080":53.1,
+"DU232q10309p1170":49.7,
+"DU232q10310p0202":48.2,
+"DU232q10311p4030":58.8,
+"DU232q10314p1050":52.3,
+"DU232q10316p0100":46.1,
+"DU232q10317p0100":49.1,
+"DU232q10318p0243":50.6,
+"DU232q10329p1160":48.5,
+"DU232q10332p1057":36.8,
+"DU232q10333p0130":52.5,
+"DU232q10334p1002":49.1,
+"DU232q10335p3230":36.1,
+"DU232q10335p3243":44.5,
+"DU232q10336p1460":42.2,
+"DU232q10339p0210":48.5,
+"DU232q10341p0130":47.0,
+"DU232q10351p1054":40.4,
+"DU232q10354p0160":40.5,
+"DU232q10355p2030":41.8,
+"DU232q10357p1110":50.9,
+"DU232q10357p1170":40.1,
+"DU232q10369p3630":43.2,
+"DU232q10375p4002":51.3,
+"DU232q10381p0130":37.9,
+"DU232q10382p0154":47.5,
+"DU232q10383p1040":40.2,
+"DU232q10385p1030":50.2,
+"DU232q10387p1002":46.3,
+"DU232q10388p4030":50.3,
+"DU232q10391p2057":48.2,
+"DU232q10393p0130":37.6,
+"DU232q10397p1002":54.2,
+"DU232q10403p2012":62.5,
+"DU232q10403p2030":51.8,
+"DU232q10404p3653":47.5,
+"DU232q10405p0230":49.5,
+"DU232q10406p0160":57.0,
+"DU232q10407p3030":37.5,
+"DU232q10408p3030":42.3,
+"DU232q10410p1040":39.8,
+"DU232q10411p0230":51.0,
+"DU232q10412p1142":39.0,
+"DU232q10413p3220":41.2,
+"DU232q10414p3630":46.7,
+"DU232q10418p4030":38.9,
+"DU232q10419p3052":54.3,
+"DU232q10422p4091":46.9,
+"DU232q10423p3130":42.8,
+"DU232q10425p0130":47.7,
+"DU232q10427p2430":34.8,
+"DU232q10428p1110":57.7,
+"DU232q10429p4041":50.0,
+"DU232q10431p0191":42.5,
+"DU232q10433p0130":55.3,
+"DU232q10434p2430":48.2,
+"DU232q10436p0191":49.8,
+"DU232q10437p3010":45.8,
+"DU232q10438p1110":46.3,
+"DU232q10438p1130":29.2,
+"DU232q10439p2091":37.7,
+"DU232q10443p3253":43.3,
+"DU232q10445p4042":45.1,
+"DU232q10446p3040":45.5,
+"DU232q10449p1510":52.1,
+"DU232q10449p1530":40.6,
+"DU232q10449p1540":48.1,
+"DU232q10451p1010":54.6,
+"DU232q10452p1410":43.4,
+"DU232q10452p1412":61.7,
+"DU232q10452p1420":34.3,
+"DU232q10452p1430":32.6,
+"DU232q10452p1443":36.6,
+"DU232q10452p1451":41.6,
+"DU232q10452p1470":53.6,
+"DU232q10452p1473":41.1,
+"DU232q10452p1480":37.3,
+"DU232q10452p1491":33.6,
+"DU232q10452p1494":41.3,
+"DU232q10454p0130":44.9,
+"DU232q10457p3040":48.0,
+"DU232q10458p4011":50.7,
+"DU232q10459p0230":43.5,
+"DU232q10460p4030":33.1,
+"DU232q10462p4002":52.3,
+"DU232q10463p3060":36.8,
+"DU232q10464p4030":60.2,
+"DU232q10465p4050":50.8,
+"DU232q10468p0191":57.8,
+"DU232q10469p2030":60.7,
+"DU232q10470p0143":42.9,
+"DU232q10472p3230":44.0,
+"DU232q10473p3130":62.2,
+"DU232q10474p3010":35.4,
+"DU232q10476p0230":58.8,
+"DU232q10478p3130":56.1,
+"DU232q10480p3640":48.9,
+"DU232q10483p2130":58.9,
+"DU232q10483p2170":62.3,
+"DU232q10485p2030":44.3,
+"DU232q10486p4030":42.9,
+"DU232q10487p2030":57.9,
+"DU232q10488p0162":53.0,
+"DU232q10492p3040":49.5,
+"DU232q10495p2030":44.7,
+"DU232q10496p2030":61.1,
+"DU232q10497p1541":47.7,
+"DU232q10502p3030":43.9,
+"DU232q10503p4053":66.0,
+"DU232q10504p1402":45.2,
+"DU232q10508p3030":58.1,
+"DU232q10509p4062":48.4,
+"DU233q10511p3220":58.4,
+"DU233q10512p3010":42.1,
+"DU233q10513p3054":51.1,
+"DU233q10514p0130":53.3,
+"DU233q10515p4030":42.1,
+"DU233q10519p3030":57.6,
+"DU233q10521p3030":35.1,
+"DU233q10529p0102":39.5,
+"DU233q10530p0230":60.4,
+"DU233q10531p4020":46.6,
+"DU233q10533p0220":54.7,
+"DU233q10534p0230":53.0,
+"DU233q10535p2030":52.0,
+"DU233q10536p4030":41.1,
+"DU233q10537p0130":52.8,
+"DU233q10540p0230":47.6,
+"DU233q10542p4030":40.0,
+"DU233q10543p4030":58.9,
+"DU233q10545p3220":44.5,
+"DU233q10546p3230":52.5,
+"DU233q10547p3291":51.1,
+"DU233q10552p3051":42.6,
+"DU233q10553p0230":57.3,
+"DU233q10554p3291":36.0,
+"DU233q10555p4091":39.2,
+"DU233q10558p4020":44.3,
+"DU233q10559p3002":43.9,
+"DU233q10560p1030":58.8,
+"DU233q10560p1054":39.4,
+"DU233q10562p3310":42.8,
+"DU233q10563p3280":44.2,
+"DU233q10564p0130":47.4,
+"DU233q10565p4060":30.2,
+"DU233q10566p1030":43.7,
+"DU233q10566p1040":41.5,
+"DU233q10567p3030":49.1,
+"DU233q10569p2030":55.0,
+"DU233q10570p4091":42.8,
+"DU233q10571p3643":62.4,
+"DU233q10572p0110":41.3,
+"DU233q10575p0130":37.5,
+"DU233q10578p5030":100.0,
+"DU233q10580p0130":48.5,
+"DU233q10580p0191":38.6,
+"DU233q10581p3320":31.5,
+"DU233q10581p3330":20.4,
+"DU233q10582p3210":44.6,
+"DU233q10584p2430":46.9,
+"DU233q10585p3310":56.6,
+"DU233q10587p3702":52.1,
+"DU233q10591p4030":53.7,
+"DU233q10593p2030":37.7,
+"DU233q10602p4020":54.2,
+"DU233q10603p4030":46.9,
+"DU233q10604p3211":44.5,
+"DU233q10606p1310":42.4,
+"DU233q10607p2030":39.7,
+"DU233q10607p2040":43.8,
+"DU233q10609p4030":57.4,
+"DU233q10623p1130":62.2,
+"DU233q10626p4030":52.3,
+"DU233q10627p3052":46.7,
+"DU233q10628p4042":39.7,
+"DU233q10630p1530":37.1,
+"DU233q10630p1540":43.1,
+"DU233q10632p1440":49.1,
+"DU233q10633p3230":29.3,
+"DU233q10634p4060":39.0,
+"DU233q10635p1430":31.9,
+"DU233q10636p3230":36.6,
+"DU233q10638p3292":39.9,
+"DU233q10641p3240":54.5,
+"DU233q10642p1030":53.3,
+"DU233q10643p0230":45.5,
+"DU234q10645p3290":42.4,
+"DU234q10646p6530":61.6,
+"DU234q10649p1430":63.0,
+"DU234q10650p3330":35.5,
+"DU234q10651p3310":40.6,
+"DU234q10655p1030":50.9,
+"DU234q10656p3030":45.3,
+"DU234q10659p3210":30.6,
+"DU234q10660p1110":51.4,
+"DU234q10661p0130":54.8,
+"DU234q10661p0170":48.5,
+"DU234q10662p0110":38.9,
+"DU234q10662p0143":44.2,
+"DU234q10664p1030":42.5,
+"DU234q10666p4054":54.8,
+"DU234q10668p3191":59.5,
+"DU234q10669p0221":28.0,
+"DU234q10670p1130":52.9,
+"DU234q10671p2030":58.5,
+"DU234q10672p3220":41.7,
+"DU234q10673p4040":39.0,
+"DU234q10674p3130":47.5,
+"DU234q10675p1130":52.8,
+"DU234q10677p3230":43.6,
+"DU234q10680p3602":53.8,
+"DU234q10682p4030":42.8,
+"DU234q10686p4010":46.1,
+"DU234q10687p0120":48.2,
+"DU234q10688p3030":37.2,
+"DU234q10691p3030":44.6,
+"DU234q10692p4030":30.4,
+"DU234q10693p4030":53.1,
+"DU234q10694p1130":43.6,
+"DU234q10695p0230":50.9,
+"DU234q10696p0230":51.8,
+"DU234q10700p0230":49.8,
+"DU234q10701p0221":54.3,
+"DU234q10702p8030":42.9,
+"DU234q10703p4043":56.4,
+"DU234q10705p0130":33.8,
+"DU234q10706p4080":53.3,
+"DU234q10707p1030":63.4,
+"DU234q10708p0207":36.1,
+"DU234q10709p0130":57.1,
+"DU234q10710p3602":51.8,
+"DU234q10711p0130":64.4,
+"DU234q10713p6530":46.9,
+"DU234q10716p3091":41.7,
+"DU234q10717p8040":47.5,
+"DU234q10719p3030":46.8,
+"DU234q10721p0230":60.4,
+"DU234q10722p0230":53.0,
+"DU234q10724p4095":44.6,
+"DU234q10726p1130":47.0,
+"DU234q10727p4030":56.0,
+"DU234q10728p3030":36.1,
+"DU234q10729p3020":38.9,
+"DU234q10730p0130":59.3,
+"DU234q10731p0230":62.2,
+"DU234q10732p3040":39.7,
+"DU234q10734p0130":45.4,
+"DU234q10734p0140":39.2,
+"DU234q10735p4020":39.9,
+"DU234q10736p3202":48.4,
+"DU234q10738p4043":52.2,
+"DU234q10739p1030":36.8,
+"DU234q10740p2030":62.8,
+"DU234q10742p4040":52.8,
+"DU234q10743p4002":61.6,
+"DU234q10744p0230":59.6,
+"DU234q10746p0211":54.3,
+"DU234q10748p0130":47.2,
+"DU234q10749p4040":56.9,
+"DU234q10750p1030":38.2,
+"DU234q10752p3653":50.8,
+"DU234q10757p0111":61.6,
+"DU234q10757p0130":51.2,
+"DU234q10759p3243":52.2,
+"DU234q10763p1043":43.7,
+"DU234q10763p1054":45.9,
+"DU234q10763p1057":43.5,
+"DU234q10764p2030":41.5,
+"DU234q10766p2030":42.6,
+"DU234q10768p3290":35.2,
+"DU234q10769p2020":57.1,
+"DU234q10769p2030":44.7,
+"DU234q10770p2030":50.8,
+"DU234q10772p0240":45.8,
+"DU234q10773p8030":44.6,
+"DU234q10775p3202":33.8,
+"DU234q10776p3243":37.4,
+"DU234q10777p1130":57.9,
+"DU234q10778p2020":58.9,
+"DU234q10786p1110":55.7,
+"DU234q10787p2030":64.4,
+"DU234q10789p0240":50.6,
+"DU234q10790p0202":52.6,
+"DU234q10793p0130":57.8,
+"DU234q10794p8040":55.1,
+"DU234q10795p0230":58.5,
+"DU234q10795p0280":51.4,
+"DU234q10797p0202":57.3,
+"DU234q10798p3020":65.0,
+"DU234q10802p0130":58.6,
+"DU234q10806p1005":50.2,
+"DU234q10807p0130":60.0,
+"DU234q10808p0230":59.6,
+"DU234q10810p1430":40.6,
+"DU234q10810p1458":33.2,
+"DU234q10817p0230":45.1,
+"DU234q10818p4010":48.3,
+"DU234q10818p4060":35.3,
+"DU234q10819p3240":36.6,
+"DU234q10822p0202":38.8,
+"DU234q10823p1180":56.3,
+"DU234q10825p4002":58.4,
+"DU234q10826p1530":60.1,
+"DU234q10826p1580":55.1,
+"DU234q10827p0130":48.0,
+"DU234q10827p0191":55.0,
+"DU234q10830p0240":59.5,
+"DU234q10831p1140":57.0,
+"DU234q10833p3030":53.1,
+"DU234q10835p0130":63.1,
+"DU234q10836p3220":47.5,
+"DU234q10837p1030":43.7,
+"DU234q10842p2010":57.4,
+"DU234q10843p3330":43.9,
+"DU234q10845p1030":39.6,
+"DU234q10845p1040":52.7,
+"DU234q10846p0140":64.1,
+"DU234q10846p0180":54.4,
+"DU234q10847p4012":54.4,
+"DU234q10849p3730":55.1,
+"DU234q10850p1050":51.4,
+"DU234q10851p0230":48.8,
+"DU234q10851p0280":37.2,
+"DU234q10851p0291":51.8,
+"DU234q10852p0130":47.4,
+"DU234q10854p4010":58.6,
+"DU241q10858p0130":53.2,
+"DU241q10861p1030":48.3,
+"DU241q10861p1040":53.8,
+"DU241q10862p1110":40.2,
+"DU241q10863p0130":62.9,
+"DU241q10866p2530":49.4,
+"DU241q10867p8020":37.7,
+"DU241q10873p0130":57.5,
+"DU241q10874p0230":47.8,
+"DU241q10875p3730":56.0,
+"DU241q10878p2030":62.3,
+"DU241q10879p0130":53.5,
+"DU241q10882p4002":62.9,
+"DU241q10883p1106":53.0,
+"DU241q10884p0206":52.9,
+"DU241q10885p4054":46.6,
+"DU241q10887p8042":67.5,
+"DU241q10887p8052":57.9,
+"DU241q10888p1030":49.6,
+"DU241q10890p0158":52.8,
+"DU241q10892p4011":39.2,
+"DU241q10893p2040":58.9,
+"DU241q10895p0212":52.2,
+"DU241q10898p2030":62.4,
+"DU241q10900p0230":59.3,
+"DU241q10901p0150":37.4,
+"DU241q10906p0240":57.7,
+"DU241q10908p1110":67.7,
+"DU241q10910p1040":41.3,
+"DU241q10910p1054":44.5,
+"DU241q10911p2430":59.8,
+"DU241q10916p1110":47.4,
+"DU241q10917p2330":51.4,
+"DU241q10918p1530":39.0,
+"DU241q10919p1510":58.2,
+"DU241q10919p1530":48.4,
+"DU241q10920p4030":34.8,
+"DU241q10928p1030":51.3,
+"DU241q10928p1080":32.6,
+"DU241q10928p1091":49.7,
+"DU241q10931p1030":58.3,
+"DU241q10933p4040":44.4,
+"DU241q10934p4010":55.0,
+"DU241q10935p2010":62.0,
+"DU241q10943p2043":56.2,
+"DU241q10944p1030":44.6,
+"DU241q10945p0130":55.7,
+"DU241q10947p1630":58.1,
+"DU241q10949p4040":62.2,
+"DU241q10951p0130":50.8,
+"DU241q10951p0140":60.8,
+"DU241q10952p2030":61.5,
+"DU241q10952p2042":66.9,
+"DU241q10955p1002":46.1,
+"DU241q10957p4030":61.5,
+"DU241q10959p6530":58.5,
+"DU241q10960p1005":42.2,
+"DU241q10960p1080":48.2,
+"DU241q10963p1030":60.1,
+"DU241q10964p4070":60.9,
+"DU241q10965p1630":63.3,
+"DU241q10966p1002":49.3,
+"DU241q10970p0100":64.3,
+"DU241q10971p0180":58.9,
+"DU241q10972p0120":56.9,
+"DU241q10973p0180":61.8,
+"DU241q10974p0151":27.6,
+"DU241q10976p4030":41.5,
+"DU241q10977p4030":60.9,
+"DU241q10982p4030":34.7,
+"DU241q10984p4030":49.3,
+"DU241q10985p0130":58.4,
+"DU241q10986p1030":56.0,
+"DU241q10992p0258":66.8,
+"DU241q10994p0242":52.1,
+"DU241q10995p1000":35.4,
+"DU241q10998p1010":53.5,
+"DU241q10999p4030":37.5,
+"DU241q11001p0140":57.7,
+"DU241q11002p1005":58.5,
+"DU241q11003p1154":51.9,
+"DU241q11005p3030":67.9,
+"DU241q11006p2102":46.8,
+"DU241q11007p1000":57.4,
+"DU241q11013p0230":58.2,
+"DU241q11015p0130":64.9,
+"DU241q11017p1030":37.6,
+"DU241q11018p1030":33.3,
+"DU241q11019p0140":52.0,
+"DU241q11020p8030":48.6,
+"DU241q11020p8042":50.0,
+"DU241q11020p8070":49.7,
+"DU241q11020p8080":35.4,
+"DU241q11023p4070":47.5,
+"DU241q11024p0105":62.0,
+"DU241q11025p0243":59.4,
+"DU241q11027p0100":57.9,
+"DU241q11028p0112":53.1,
+"DU241q11033p0170":56.6,
+"DU241q11034p6530":52.8,
+"DU241q11035p0210":53.6,
+"DU241q11036p0110":57.0,
+"DU241q11037p0254":57.1,
+"DU241q11040p4010":51.8,
+"DU241q11044p1000":57.5,
+"DU241q11046p4030":49.7,
+"DU241q11047p1170":40.0,
+"DU241q11048p2070":49.1,
+"DU241q11049p2060":46.8,
+"DU241q11051p2030":63.8,
+"DU241q11051p2043":54.7,
+"DU241q11051p2050":62.4,
+"DU241q11053p4030":57.0,
+"DU241q11054p4054":60.1,
+"DU241q11055p0240":63.6,
+"DU242q11056p0180":41.9,
+"DU242q11057p4030":64.4,
+"DU242q11059p1160":38.4,
+"DU242q11062p1000":43.9,
+"DU242q11069p0200":55.8,
+"DU242q11070p1040":60.3,
+"DU242q11072p4000":62.3,
+"DU242q11079p2030":62.2,
+"DU242q11081p0154":51.8,
+"DU242q11082p1030":49.6,
+"DU242q11084p0171":60.9,
+"DU242q11085p0158":40.2,
+"DU242q11087p1630":42.6,
+"DU242q11088p0258":59.7,
+"DU242q11089p1050":35.9,
+"DU242q11090p1002":37.6,
+"DU242q11096p0150":58.6,
+"DU242q11097p0100":41.0,
+"DU242q11098p3030":55.0,
+"DU242q11099p2023":59.9,
+"DU242q11100p1142":54.7,
+"DU242q11101p3058":62.4,
+"DU242q11102p1012":59.2,
+"DU242q11103p1050":38.4,
+"DU242q11104p2030":46.7,
+"DU242q11107p1130":33.9,
+"DU242q11111p0230":61.1,
+"DU242q11116p3630":53.4,
+"DU242q11118p4010":64.8,
+"DU242q11119p0140":47.5,
+"DU242q11121p0258":54.4,
+"DU242q11122p1000":28.2,
+"DU242q11123p0202":63.5,
+"DU242q11124p1154":55.6,
+"DU242q11125p2053":60.2,
+"DU242q11131p2030":48.5,
+"DU242q11133p0102":43.1,
+"DU242q11134p0130":41.5,
+"DU242q11135p0130":62.5,
+"DU242q11137p1010":61.8,
+"DU242q11138p1006":34.1,
+"DU242q11141p8030":50.0,
+"DU242q11144p1530":36.7,
+"DU242q11145p4030":61.5,
+"DU242q11149p2040":50.3,
+"DU242q11151p0130":55.0,
+"DU242q11152p3730":53.1,
+"DU242q11156p1030":57.5,
+"DU242q11159p0130":45.0,
+"DU242q11159p0140":50.4,
+"DU242q11163p2005":55.5,
+"DU242q11164p8043":58.8,
+"DU242q11165p4023":62.8,
+"DU242q11167p1030":53.6,
+"DU242q11170p0130":44.5,
+"DU242q11171p4010":40.1,
+"DU242q11172p2030":64.0,
+"DU242q11173p4060":48.0,
+"DU242q11174p3010":52.5,
+"DU242q11175p0130":61.6,
+"DU242q11178p1070":46.0,
+"DU242q11180p1142":50.9,
+"DU242q11185p4024":44.3,
+"DU242q11186p1100":53.3,
+"DU242q11187p4052":66.7,
+"DU242q11189p1005":45.0,
+"DU242q11190p1002":50.4,
+"DU242q11192p1530":31.2,
+"DU242q11193p0154":56.1,
+"DU242q11194p4030":56.4,
+"DU242q11195p4043":45.0,
+"DU242q11196p2005":48.1,
+"DU242q11199p0130":59.1,
+"DU242q11200p0291":67.0,
+"DU242q11201p1010":48.4,
+"DU242q11201p1030":47.2,
+"DU242q11204p2460":42.5,
+"DU242q11208p0210":100.0,
+"DU242q11212p1021":37.0,
+"DU242q11213p4000":47.9,
+"DU242q11215p1530":54.9,
+"DU242q11220p0330":65.0,
+"DU242q11222p4010":51.1,
+"DU242q11224p4010":43.0,
+"DU242q11225p0110":50.8,
+"DU242q11227p0130":56.2,
+"DU242q11231p0230":55.6,
+"DU242q11232p0230":66.1,
+"DU242q11233p0210":48.5,
+"DU242q11234p0202":63.6,
+"DU242q11235p1151":40.7,
+"DU242q11236p0253":51.9,
+"DU242q11237p0170":43.7,
+"DU242q11238p1057":51.9,
+"DU242q11238p1080":31.7,
+"DU242q11241p4070":55.5,
+"DU242q11244p0154":68.0,
+"DU242q11248p0240":53.3,
+"DU242q11249p0150":60.9,
+"DU242q11252p4054":57.6,
+"DU242q11254p0130":39.4,
+"DU242q11255p4020":59.9,
+"DU242q11256p0110":59.8,
+"DU242q11256p0130":53.9,
+"DU242q11257p1024":62.0,
+"DU242q11258p2453":53.5,
+"DU242q11259p1060":30.7,
+"DU242q11260p2010":50.1,
+"DU242q11264p1130":52.9,
+"DU242q11265p2040":31.4,
+"DU242q11268p2030":59.9,
+"DU242q11269p0151":54.5,
+"DU242q11270p1060":52.2,
+"DU242q11274p0170":43.2,
+"DU242q11275p0106":63.9,
+"DU242q11277p1560":42.4,
+"DU242q11278p0230":46.2,
+"DU242q11279p4057":60.5,
+"DU242q11280p4080":47.3,
+"DU242q11281p4050":59.0,
+"DU242q11282p0270":63.0,
+"DU242q11286p4002":68.5,
+"DU242q11288p0143":63.3,
+"DU242q11289p0102":44.6,
+"DU242q11289p0130":42.6,
+"DU242q11291p0130":58.2,
+"DU242q11292p0130":68.2,
+"DU242q11293p1030":62.7,
+"DU242q11294p4010":64.8,
+"DU242q11295p4053":64.4,
+"DU242q11296p1091":55.3,
+"DU242q11297p4002":54.3,
+"DU242q11298p4010":62.5,
+"DU242q11302p4080":55.8,
+"DU242q11303p4057":48.8,
+"DU242q11304p4002":67.0,
+"DU242q11309p4091":49.5,
+"DU242q11315p4091":48.5,
+"DU242q11316p0112":56.8,
+"DU242q11322p1002":59.9,
+"DU242q11325p0206":43.8,
+"DU242q11326p4030":56.6,
+"DU242q11327p1030":49.8,
+"DU242q11330p3002":47.1,
+"DU242q11331p4010":53.9,
+"DU242q11333p3030":51.7,
+"DU242q11342p3143":54.4,
+"DU242q11343p0243":56.6,
+"DU242q11346p0130":45.1,
+"DU242q11348p4002":60.3,
+"DU242q11355p0130":44.3,
+"DU242q11356p3130":41.7,
+"DU242q11360p0130":56.5,
+"DU242q11362p8030":56.6,
+"DU242q11362p8070":61.6,
+"DU242q11363p0106":55.3,
+"DU242q11364p2011":53.9,
+"DU242q11364p2030":56.4,
+"DU242q11365p4040":48.1,
+"DU242q11367p4030":54.5,
+"DU242q11369p4000":59.7,
+"DU242q11371p1140":57.4,
+"DU242q11372p1530":55.7,
+"DU242q11375p4006":41.3,
+"DU242q11377p3663":58.5,
+"DU242q11378p0130":50.3,
+"DU242q11378p0191":42.3,
+"DU242q11379p1030":62.4,
+"DU242q11380p0230":69.7,
+"DU242q11381p3294":59.5,
+"DU242q11382p2030":56.3,
+"DU242q11383p4030":49.8,
+"DU242q11387p0194":67.6,
+"DU242q11388p1030":40.6,
+"DU242q11389p2030":52.0,
+"DU242q11390p4091":55.1,
+"DU242q11391p3002":54.9,
+"DU242q11392p3030":48.0,
+"DU242q11393p3062":51.9,
+"DU242q11395p4050":57.1,
+"DU242q11397p2030":62.1,
+"DU242q11399p1530":43.3,
+"DU242q11400p1510":58.8,
+"DU242q11400p1530":59.4,
+"DU242q11401p1510":63.1,
+"DU242q11401p1530":48.2,
+"DU242q11402p0191":48.2,
+"DU242q11406p3092":48.5,
+"DU243q11410p4030":62.0,
+"DU243q11413p3053":54.1,
+"DU243q11415p4080":47.7,
+"DU243q11416p3242":53.2,
+"DU243q11418p4000":30.8,
+"DU243q11420p2030":58.9,
+"DU243q11424p0191":46.9,
+"DU243q11428p3263":52.7,
+"DU243q11429p3130":37.6,
+"DU243q11431p4040":71.2,
+"DU243q11433p3260":54.1,
+"DU243q11434p3020":52.2,
+"DU243q11434p3043":0.0,
+"DU243q11437p1130":43.7,
+"DU243q11438p1530":45.3,
+"DU243q11438p1540":51.9,
+"DU243q11439p1530":43.9,
+"DU243q11440p0130":49.3,
+"DU243q11441p0130":51.8,
+"DU243q11442p0120":55.7,
+"DU243q11442p0130":54.0,
+"DU243q11445p0230":43.1,
+"DU243q11445p0240":52.8,
+"DU243q11446p0230":66.5,
+"DU243q11447p0291":52.4,
+"DU243q11450p4000":51.2,
+"DU243q11451p3230":58.0,
+"DU243q11454p1110":50.7,
+"DU243q11458p0130":64.4,
+"DU243q11460p2030":50.1,
+"DU243q11462p2030":44.8,
+"DU243q11464p0130":52.7,
+"DU243q11468p3030":40.8,
+"DU243q11469p3240":33.6,
+"DU243q11473p0151":60.0,
+"DU243q11475p2082":56.8,
+"DU243q11477p4010":49.1,
+"DU243q11478p4030":56.4,
+"DU243q11479p3302":55.3,
+"DU243q11480p3330":32.4,
+"DU243q11482p3012":60.2,
+"DU243q11484p3030":41.3,
+"DU243q11486p2043":53.4,
+"DU243q11489p1130":59.0,
+"DU243q11490p0230":42.6,
+"DU243q11492p0130":43.8,
+"DU243q11492p0143":52.5,
+"DU243q11493p3030":51.7,
+"DU243q11495p3030":39.0,
+"DU243q11496p3230":42.3,
+"DU243q11500p4091":46.8,
+"DU243q11502p4000":61.6,
+"DU243q11503p0100":47.6,
+"DU243q11504p1030":40.9,
+"DU243q11505p1020":49.5,
+"DU243q11505p1030":55.6,
+"DU243q11506p4030":46.3,
+"DU243q11506p4091":44.1,
+"DU243q11508p3143":47.0,
+"DU243q11509p3300":47.2,
+"DU243q11511p2030":50.1,
+"DU243q11511p2091":56.5,
+"DU243q11513p1005":32.7,
+"DU243q11514p3002":21.7,
+"DU243q11517p1530":23.1,
+"DU243q11518p4020":48.3,
+"DU243q11518p4030":52.3,
+"DU243q11519p3050":52.2,
+"DU243q11520p3053":33.3,
+"DU243q11521p2030":57.9,
+"DU243q11522p1030":55.0,
+"DU243q11522p1051":52.5,
+"DU243q11523p3030":58.6,
+"DU243q11524p2091":47.5,
+"DU243q11525p0220":44.6,
+"DU243q11525p0291":38.0,
+"DU243q11526p3230":45.9,
+"DU244q11529p3005":28.3,
+"DU244q11531p0130":59.8,
+"DU244q11534p3220":54.5,
+"DU244q11537p1505":50.1,
+"DU244q11538p3330":33.9,
+"DU244q11539p3130":53.5,
+"DU244q11540p0330":53.8,
+"DU244q11541p1030":41.9,
+"DU244q11541p1040":52.2,
+"DU244q11542p4010":51.9,
+"DU244q11543p3002":43.6,
+"DU244q11544p0130":52.0,
+"DU244q11545p1511":64.1,
+"DU244q11545p1543":51.7,
+"DU244q11546p3030":51.7,
+"DU244q11550p3002":43.5,
+"DU244q11551p0230":46.3,
+"DU244q11552p3020":61.1,
+"DU244q11554p3205":50.9,
+"DU244q11558p3380":53.0,
+"DU244q11559p2011":58.0,
+"DU244q11559p2040":61.1,
+"DU244q11560p3002":50.8,
+"DU244q11563p3030":51.2,
+"DU244q11566p3010":64.7,
+"DU244q11569p4040":63.5,
+"DU244q11570p1110":51.5,
+"DU244q11571p4094":56.2,
+"DU244q11572p0205":40.0,
+"DU244q11574p0205":65.5,
+"DU244q11577p3305":48.1,
+"DU244q11578p3330":28.5,
+"DU244q11579p0130":52.7,
+"DU244q11579p0191":60.1,
+"DU244q11580p1511":53.6,
+"DU244q11580p1520":35.8,
+"DU244q11581p2430":58.9,
+"DU244q11582p0211":50.7,
+"DU244q11582p0240":37.9,
+"DU244q11583p3000":28.9,
+"DU244q11585p0230":43.3,
+"DU244q11587p0230":39.8,
+"DU244q11589p3030":23.4,
+"DU244q11590p3030":55.9,
+"DU244q11591p2030":53.4,
+"DU244q11592p4046":37.8,
+"DU244q11593p3043":35.7,
+"DU244q11594p4002":35.7,
+"DU244q11596p4030":52.5,
+"DU244q11598p8010":59.9,
+"DU244q11598p8030":27.5,
+"DU244q11598p8040":44.8,
+"DU244q11599p3330":34.9,
+"DU244q11600p2006":66.8,
+"DU244q11602p3220":40.3,
+"DU244q11605p1030":35.8,
+"DU244q11607p0130":56.7,
+"DU244q11607p0140":58.4,
+"DU244q11609p4030":50.4,
+"DU244q11611p1030":28.8,
+"DU244q11612p0130":23.4,
+"DU244q11613p0230":36.1,
+"DU244q11613p0280":18.3,
+"DU244q11614p3202":38.8,
+"DU244q11615p0230":31.3,
+"DU244q11616p4030":37.7,
+"DU244q11618p0230":44.9,
+"DU244q11619p4002":62.3,
+"DU244q11620p4080":36.8,
+"DU244q11621p3330":24.6,
+"DU244q11623p8080":55.8,
+"DU244q11624p2030":55.7,
+"DU244q11625p1110":56.2,
+"DU244q11626p8010":29.9,
+"DU244q11626p8030":18.1,
+"DU244q11627p0130":60.4,
+"DU244q11628p2030":44.0,
+"DU244q11629p6502":40.8,
+"DU244q11630p0130":54.9,
+"DU244q11630p0140":56.4,
+"DU244q11631p0130":30.3,
+"DU244q11631p0194":56.9,
+"DU244q11633p1502":35.1,
+"DU244q11634p1110":67.2,
+"DU244q11635p3002":64.1,
+"DU244q11636p4080":51.7,
+"DU244q11637p1030":39.6,
+"DU244q11637p1082":39.1,
+"DU244q11638p4070":57.7,
+"DU244q11639p4063":37.5,
+"DU244q11640p3280":30.3,
+"DU244q11641p4050":42.0,
+"DU244q11642p1510":52.1,
+"DU244q11642p1530":57.7,
+"DU244q11643p1030":49.8,
+"DU244q11645p2030":54.6,
+"DU244q11646p1161":54.9,
+"DU244q11646p1180":54.8,
+"DU244q11647p0102":62.3,
+"DU244q11649p0230":61.4,
+"DU244q11651p1330":25.6,
+"DU244q11652p2230":30.9,
+"DU244q11653p3211":44.8,
+"DU244q11654p0130":56.9,
+"DU244q11655p0230":61.9,
+"DU244q11656p0130":52.2,
+"DU244q11657p2330":51.0,
+"DU244q11658p3030":39.8,
+"DU244q11660p3330":28.5,
+"DU244q11661p1030":57.6,
+"DU244q11661p1080":40.9,
+"DU244q11667p3682":59.0,
+"DU244q11668p1630":43.7,
+"DU244q11669p4050":57.4,
+"DU244q11670p3305":40.9,
+"DU244q11671p3702":37.7,
+"DU244q11672p0230":58.5,
+"DU244q11673p2040":54.7,
+"DU244q11676p0230":63.7,
+"DU244q11678p4040":42.5,
+"DU244q11679p0105":57.2,
+"DU244q11680p3230":38.1,
+"DU244q11681p3191":44.0,
+"DU244q11684p0253":54.9,
+"DU244q11685p3240":41.0,
+"DU244q11686p3130":56.4,
+"DU244q11687p3902":45.0,
+"DU244q11688p2030":60.5,
+"DU244q11689p3310":47.3,
+"DU244q11690p3930":32.6,
+"DU244q11692p3153":55.0,
+"DU244q11693p3251":38.9,
+"DU244q11694p1530":56.3,
+"DU244q11695p0102":50.8,
+"DU244q11696p1002":46.6,
+"DU244q11697p3202":44.7,
+"DU244q11700p2011":65.6,
+"DU244q11700p2030":64.0,
+"DU244q11701p1130":36.3,
+"DU244q11702p2011":38.4,
+"DU244q11703p3030":42.3,
+"DU244q11705p2030":59.4,
+"DU244q11705p2070":53.4,
+"DU244q11705p2080":44.8,
+"DU244q11706p1010":45.8,
+"DU244q11706p1030":41.7,
+"DU244q11707p3042":45.4,
+"DU244q11708p2030":45.7,
+"DU244q11710p0110":58.7,
+"DU251q11714p0130":55.0,
+"DU251q11715p4080":38.4,
+"DU251q11717p0271":48.0,
+"DU251q11718p2010":63.4,
+"DU251q11719p0110":56.2,
+"DU251q11720p0240":61.6,
+"DU251q11723p1105":29.6,
+"DU251q11724p1580":29.3,
+"DU251q11725p8030":58.4,
+"DU251q11725p8070":42.2,
+"DU251q11727p3040":55.0,
+"DU251q11729p4010":42.8,
+"DU251q11730p0158":68.6,
+"DU251q11731p0230":64.7,
+"DU251q11732p1530":42.0,
+"DU251q11732p1591":53.4,
+"DU251q11733p0130":48.5,
+"DU251q11734p2030":54.9,
+"DU251q11735p3030":40.7,
+"DU251q11736p0243":44.5,
+"DU251q11738p0110":67.8,
+"DU251q11739p1058":47.8,
+"DU251q11740p1030":54.2,
+"DU251q11742p3023":41.5,
+"DU251q11743p2023":46.0,
+"DU251q11744p1030":47.8,
+"DU251q11745p3030":65.4,
+"DU251q11746p0223":59.9,
+"DU251q11748p4002":48.4,
+"DU251q11748p4030":57.6,
+"DU251q11750p0100":67.8,
+"DU251q11751p2430":55.2,
+"DU251q11752p4030":52.4,
+"DU251q11753p2070":56.0,
+"DU251q11753p2091":48.4,
+"DU251q11759p1630":56.0,
+"DU251q11760p0170":51.3,
+"DU251q11762p2010":50.4,
+"DU251q11765p3702":62.9,
+"DU251q11767p8030":56.0,
+"DU251q11768p0230":56.7,
+"DU251q11769p1054":36.8,
+"DU251q11770p1110":59.3,
+"DU251q11770p1130":55.1,
+"DU251q11771p1180":54.5,
+"DU251q11772p2030":40.5,
+"DU251q11777p1502":34.5,
+"DU251q11777p1530":38.6,
+"DU251q11777p1540":32.2,
+"DU251q11777p1570":57.5,
+"DU251q11778p1030":47.0,
+"DU251q11779p4050":46.3,
+"DU251q11779p4080":42.6,
+"DU251q11780p1010":55.0,
+"DU251q11780p1030":55.9,
+"DU251q11781p2030":44.3,
+"DU251q11785p1010":36.6,
+"DU251q11786p0210":32.2,
+"DU251q11787p1080":39.9,
+"DU251q11788p0280":50.9,
+"DU251q11789p1002":66.7,
+"DU251q11790p2002":52.6,
+"DU251q11791p4023":24.0,
+"DU251q11792p4002":55.6,
+"DU251q11796p0220":49.2,
+"DU251q11797p2170":65.7,
+"DU251q11798p2040":66.0,
+"DU251q11799p1010":65.2,
+"DU251q11799p1030":41.1,
+"DU251q11800p0430":40.6,
+"DU251q11801p3630":53.3,
+"DU251q11802p1010":52.1,
+"DU251q11803p3758":48.2,
+"DU251q11804p2030":66.1,
+"DU251q11804p2060":65.4,
+"DU251q11805p3770":60.0,
+"DU251q11806p0270":41.7,
+"DU251q11807p1050":44.7,
+"DU251q11807p1080":18.8,
+"DU251q11808p0250":39.1,
+"DU251q11808p0280":16.1,
+"DU251q11809p0158":73.3,
+"DU251q11812p4081":61.0,
+"DU251q11814p1056":51.7,
+"DU251q11814p1081":54.1,
+"DU251q11816p2030":55.5,
+"DU251q11817p1142":53.8,
+"DU251q11818p4060":60.7,
+"DU251q11819p1106":39.1,
+"DU251q11820p2410":52.7,
+"DU251q11821p1110":58.3,
+"DU251q11821p1171":54.3,
+"DU251q11822p0202":59.5,
+"DU251q11822p0230":61.5,
+"DU251q11825p2030":43.8,
+"DU251q11826p2061":57.9,
+"DU251q11827p1054":69.0,
+"DU251q11828p4056":60.7,
+"DU251q11831p3081":48.8,
+"DU251q11832p0281":39.5,
+"DU251q11833p4002":51.5,
+"DU251q11834p2170":43.9,
+"DU251q11835p2010":57.1,
+"DU251q11835p2060":61.6,
+"DU251q11838p0140":61.6,
+"DU251q11839p1030":29.6,
+"DU251q11840p2030":44.8,
+"DU251q11841p3740":43.6,
+"DU251q11842p1071":49.7,
+"DU251q11843p1010":71.2,
+"DU251q11845p0130":34.7,
+"DU251q11846p0154":36.5,
+"DU251q11847p1075":28.6,
+"DU251q11849p3730":52.1,
+"DU251q11850p4000":55.0,
+"DU251q11852p0106":56.1,
+"DU251q11853p0120":66.8,
+"DU251q11854p8030":52.7,
+"DU251q11855p0120":63.5,
+"DU251q11856p3653":55.7,
+"DU251q11857p4002":72.2,
+"DU251q11859p1000":66.9,
+"DU251q11859p1002":65.2,
+"DU251q11860p3030":37.1,
+"DU251q11866p2075":40.0,
+"DU251q11867p1102":50.0,
+"DU251q11868p2030":51.2,
+"DU251q11869p4075":54.4,
+"DU251q11870p2030":44.7,
+"DU251q11871p0100":55.1,
+"DU251q11872p3042":68.2,
+"DU251q11873p0100":61.5,
+"DU251q11875p0242":66.6,
+"DU251q11875p0271":62.0,
+"DU251q11877p0130":51.3,
+"DU251q11878p1053":54.8,
+"DU251q11881p1002":54.8,
+"DU251q11882p8010":67.4,
+"DU251q11883p1000":56.0,
+"DU251q11885p0212":54.4,
+"DU251q11887p1011":56.9,
+"DU251q11888p1058":50.0,
+"DU251q11889p0110":72.0,
+"DU251q11890p4023":33.3,
+"DU251q11891p4030":46.0,
+"DU251q11892p1020":55.1,
+"DU251q11893p3630":55.6,
+"DU251q11894p1110":67.2,
+"DU251q11897p0171":68.0,
+"DU251q11900p1005":64.5,
+"DU251q11901p2054":51.7,
+"DU251q11903p4060":58.2,
+"DU251q11905p0260":55.6,
+"DU251q11906p0106":59.2,
+"DU251q11907p3654":63.5,
+"DU251q11908p4005":35.6,
+"DU251q11909p0102":39.5,
+"DU251q11910p2453":52.7,
+"DU251q11911p4030":57.0,
+"DU251q11912p3002":51.1,
+"DU251q11913p0102":49.3,
+"DU251q11915p4012":66.1,
+"DU251q11916p1030":37.0,
+"DU251q11916p1054":43.9,
+"DU251q11918p0194":38.8,
+"DU251q11919p2020":69.2,
+"DU251q11920p1011":51.6,
+"DU251q11921p4053":56.5,
+"DU251q11923p1010":51.1,
+"DU251q11923p1030":33.7,
+"DU251q11924p1150":61.1,
+"DU251q11925p2030":41.0,
+"DU251q11926p1030":49.1,
+"DU251q11927p1030":63.2,
+"DU251q11928p0102":64.3,
+"DU251q11929p2442":45.3,
+"DU251q11932p0105":60.9,
+"DU251q11933p0130":38.5,
+"DU251q11934p1540":33.7,
+"DU251q11936p1000":55.0,
+"DU251q11937p1106":50.3,
+"DU251q11939p1030":56.8,
+"DU251q11940p2240":63.6,
+"DU251q11941p1002":59.0,
+"DU251q11942p1054":58.8,
+"DU251q11943p0254":64.9,
+"DU251q11945p0171":65.4,
+"DU251q11946p1053":53.3,
+"DU251q11947p3194":60.7,
+"DU251q11948p0100":62.9,
+"DU251q11949p2050":41.0,
+"DU251q11950p4050":56.5,
+"DU251q11951p2012":46.2,
+"DU251q11952p1012":50.0,
+"DU251q11955p1053":64.3,
+"DU251q11956p0253":23.1,
+"DU251q11957p1030":59.0,
+"DU251q11958p3002":62.1,
+"DU251q11959p1012":46.5,
+"DU251q11963p0110":58.6,
+"DU251q11964p3010":68.7,
+"DU251q11966p2042":56.6,
+"DU251q11967p0120":56.5,
+"DU251q11970p4030":59.5,
+"DU251q11971p1030":100.0,
+"DU251q11972p0230":100.0,
+"DU251q11973p0210":54.2,
+"DU251q11976p0153":39.6,
+"DU251q11977p1010":65.6,
+"DU251q11978p0210":43.9,
+"DU251q11979p1530":54.3,
+"DU251q11980p0211":65.6,
+"DU251q11981p2170":48.2,
+"DU251q11983p1011":63.8,
+"DU251q11984p1030":56.6,
+"DU251q11985p2030":47.7,
+"DU251q11986p1030":42.5,
+"DU251q11989p2030":55.8,
+"DU251q11989p2052":52.2,
+"DU251q11990p1010":40.4,
+"DU251q11991p0112":38.5,
+"DU251q11992p4010":63.2,
+"DU251q11993p1110":62.0,
+"DU251q11994p4002":100.0,
+"DU251q11995p2005":45.4,
+"DU251q11998p1006":54.7,
+"DU251q11999p1030":48.4,
+"DU251q12000p2430":37.7,
+"DU251q12002p1010":59.5,
+"DU251q12007p4061":59.3,
+"DU251q12009p0130":54.0,
+"DU251q12010p1030":45.8,
+"DU252q12012p1010":55.0,
+"DU252q12012p1030":39.1,
+"DU252q12014p0130":43.4,
+"DU252q12017p1053":61.1,
+"DU252q12018p1030":37.2,
+"DU252q12019p8030":52.3,
+"DU252q12020p1011":56.9,
+"DU252q12021p1542":40.6,
+"DU252q12022p1030":75.2,
+"DU252q12024p4040":44.6,
+"DU252q12025p2010":53.4,
+"DU252q12026p4030":47.3,
+"DU252q12027p1030":55.6,
+"DU252q12029p0230":55.0,
+"DU252q12032p0102":65.6,
+"DU252q12038p0170":70.5,
+"DU252q12039p0100":42.7,
+"DU252q12040p1011":66.2,
+"DU252q12041p0102":41.6,
+"DU252q12042p1330":30.1,
+"DU252q12044p0171":62.1,
+"DU252q12045p2090":64.1,
+"DU252q12047p0100":53.4,
+"DU252q12048p0140":48.0,
+"DU252q12049p4094":40.7,
+"DU252q12050p1094":28.5,
+"DU252q12053p0130":56.8,
+"DU252q12054p0140":54.0,
+"DU252q12062p1042":58.6,
+"DU252q12063p1040":50.6,
+"DU252q12064p2053":40.3,
+"DU252q12066p1030":60.4,
+"DU252q12067p0130":68.5,
+"DU252q12070p1005":49.7,
+"DU252q12070p1041":42.6,
+"DU252q12071p4002":33.9,
+"DU252q12072p1054":31.9,
+"DU252q12074p1054":55.9,
+"DU252q12075p0230":45.0,
+"DU252q12076p4050":47.6,
+"DU252q12076p4080":46.7,
+"DU252q12077p1050":100.0,
+"DU252q12077p1080":36.8,
+"DU252q12078p2050":50.0,
+"DU252q12078p2080":45.5,
+"DU252q12079p4020":50.1,
+"DU252q12080p0230":60.4,
+"DU252q12082p0150":70.6,
+"DU252q12086p0295":46.8,
+"DU252q12087p0105":45.4,
+"DU252q12088p1056":54.9,
+"DU252q12089p1030":57.6,
+"DU252q12091p1002":54.3,
+"DU252q12094p1010":68.2,
+"DU252q12095p0180":40.8,
+"DU252q12096p2040":66.7,
+"DU252q12097p1054":58.0,
+"DU252q12098p0130":57.2,
+"DU252q12100p2022":51.3,
+"DU252q12102p0200":31.8,
+"DU252q12104p1030":53.7,
+"DU252q12104p1040":50.0,
+"DU252q12105p1030":60.8,
+"DU252q12106p0150":52.3,
+"DU252q12107p0130":60.3,
+"DU252q12108p2030":57.8,
+"DU252q12110p2030":65.4,
+"DU252q12111p2030":70.7,
+"DU252q12112p4030":61.2,
+"DU252q12114p2030":41.9,
+"DU252q12118p1522":37.9,
+"DU252q12119p4022":53.1,
+"DU252q12120p2002":58.4,
+"DU252q12122p4080":46.1,
+"DU252q12123p1080":41.5,
+"DU252q12124p2080":43.6,
+"DU252q12126p1012":50.5,
+"DU252q12129p2010":55.8,
+"DU252q12134p1030":44.2,
+"DU252q12138p1054":33.9,
+"DU252q12139p0254":45.8,
+"DU252q12140p4054":44.6,
+"DU252q12141p4040":54.6,
+"DU252q12147p1002":38.7,
+"DU252q12148p3030":47.1,
+"DU252q12149p1040":61.3,
+"DU252q12150p0210":59.0,
+"DU252q12152p0205":51.2,
+"DU252q12155p0130":47.3,
+"DU252q12156p4030":51.9,
+"DU252q12156p4080":32.0,
+"DU252q12157p1030":50.0,
+"DU252q12157p1080":66.7,
+"DU252q12158p2030":0.0,
+"DU252q12158p2080":88.9,
+"DU252q12161p0102":28.9,
+"DU252q12162p0210":57.0,
+"DU252q12163p0130":58.5,
+"DU252q12167p0230":53.6,
+"DU252q12169p1010":57.0,
+"DU252q12169p1030":62.6,
+"DU252q12169p1040":37.4,
+"DU252q12169p1060":40.9,
+"DU252q12171p4080":50.6,
+"DU252q12173p0280":50.0,
+"DU252q12176p0230":53.0,
+"DU252q12177p0143":48.9,
+"DU252q12179p1094":45.9,
+"DU252q12180p2011":64.2,
+"DU252q12183p0130":52.8,
+"DU252q12184p1058":61.9,
+"DU252q12185p2010":61.1,
+"DU252q12185p2060":55.0,
+"DU252q12186p1105":53.4,
+"DU252q12187p4070":59.4,
+"DU252q12188p1070":64.9,
+"DU252q12193p1540":40.2,
+"DU252q12197p0230":47.9,
+"DU252q12202p1042":47.7,
+"DU252q12202p1054":56.0,
+"DU252q12202p1080":48.7,
+"DU252q12203p4060":60.5,
+"DU252q12204p1060":51.9,
+"DU252q12209p1003":28.9,
+"DU252q12212p2094":52.0,
+"DU252q12213p2040":53.7,
+"DU252q12217p4094":55.1,
+"DU252q12218p0294":43.6,
+"DU252q12221p0270":48.8,
+"DU252q12222p4010":66.9,
+"DU252q12223p1010":58.1,
+"DU252q12224p0210":53.8,
+"DU252q12225p0161":61.1,
+"DU252q12230p4010":62.8,
+"DU252q12232p4030":48.9,
+"DU252q12238p1030":56.1,
+"DU252q12240p0180":51.1,
+"DU252q12245p4071":51.0,
+"DU252q12246p1071":63.6,
+"DU252q12247p2071":57.1,
+"DU252q12249p2043":63.1,
+"DU252q12251p2030":62.3,
+"DU252q12253p4006":62.4,
+"DU252q12254p1006":34.1,
+"DU252q12255p2006":50.0,
+"DU252q12259p0260":49.1,
+"DU252q12260p0230":58.0,
+"DU252q12261p3002":53.3,
+"DU252q12264p3010":39.1,
+"DU252q12266p0130":35.8,
+"DU252q12268p4072":52.8,
+"DU252q12271p2030":69.2,
+"DU252q12275p4030":63.9,
+"DU252q12276p1030":40.4,
+"DU252q12277p0230":68.6,
+"DU252q12281p0230":52.1,
+"DU252q12282p4080":56.1,
+"DU252q12285p2030":62.3,
+"DU252q12286p0172":63.3,
+"DU252q12287p4006":56.1,
+"DU252q12288p1006":39.3,
+"DU252q12289p2006":53.8,
+"DU252q12290p2423":50.3,
+"DU252q12291p4003":58.2,
+"DU252q12295p1070":51.2,
+"DU252q12303p4016":61.3,
+"DU252q12306p4094":55.1,
+"DU252q12310p0230":66.4,
+"DU252q12311p1110":60.6,
+"DU252q12312p3030":53.5,
+"DU252q12313p1082":51.6,
+"DU252q12314p1160":60.4,
+"DU252q12317p4030":63.6,
+"DU252q12320p2495":48.9,
+"DU252q12323p8230":52.0,
+"DU252q12323p8240":51.4,
+"DU252q12325p1002":59.8,
+"DU252q12326p3030":49.5,
+"DU252q12329p0243":59.6,
+"DU252q12330p1005":61.5,
+"DU252q12331p0130":40.1,
+"DU252q12333p1020":51.0,
+"DU252q12334p0100":42.9,
+"DU252q12335p3002":59.9,
+"DU252q12336p1110":69.3,
+"DU252q12338p1106":52.5,
+"DU252q12339p1050":37.5,
+"DU252q12340p4094":51.1,
+"DU252q12343p1110":49.8,
+"DU252q12344p1003":46.4,
+"DU252q12345p0194":70.8,
+"DU252q12347p1030":55.6,
+"DU252q12353p0230":62.1,
+"DU252q12354p0140":65.1,
+"DU252q12355p4043":48.4,
+"DU252q12359p2430":62.0,
+"DU252q12360p4080":62.1,
+"DU252q12361p1180":54.3,
+"DU252q12362p0280":62.9,
+"DU252q12364p1005":53.9,
+"DU252q12365p4095":46.9,
+"DU252q12369p3072":63.4,
+"DU252q12370p0130":43.0,
+"DU252q12371p0253":64.1,
+"DU252q12376p4060":50.2,
+"DU252q12385p3770":49.6,
+"DU252q12387p1005":52.8,
+"DU252q12388p2030":68.6,
+"DU252q12389p4058":58.6,
+"DU252q12392p0260":39.6,
+"DU252q12393p3222":52.1,
+"DU252q12395p0170":39.6,
+"DU252q12399p4002":47.7,
+"DU252q12402p4058":55.6,
+"DU252q12405p1005":31.3,
+"DU252q12406p2070":60.6,
+"DU252q12411p1096":68.0,
+"DU252q12412p1040":62.5,
+"DU252q12413p0180":56.1,
+"DU252q12414p0130":48.6,
+"DU252q12418p0112":43.7,
+"DU252q12422p2030":59.5,
+"DU252q12423p0130":55.2,
+"DU252q12424p0130":38.3,
+"DU252q12425p2430":61.9,
+"DU252q12431p1002":39.8,
+"DU252q12432p1658":100.0,
+"DU252q12434p4002":56.4,
+"DU252q12435p3002":50.0,
+"DU252q12436p0202":24.2,
+"DU252q12437p1030":33.7,
+"DU252q12441p4062":56.9,
+"DU252q12442p3062":42.6,
+"DU252q12443p2062":47.1,
+"DU252q12446p4022":40.0,
+"DU252q12451p0230":65.0,
+"DU252q12452p1158":58.7,
+"DU252q12456p4030":65.1,
+"DU252q12457p1330":41.7,
+"DU252q12458p2030":66.7,
+"DU252q12459p1530":35.3,
+"DU252q12459p1543":44.7,
+"DU252q12459p1546":44.4,
+"DU252q12459p1556":52.1,
+"DU252q12459p1560":46.6,
+"DU252q12460p1330":39.8,
+"DU252q12463p0230":49.7,
+"DU252q12464p0130":60.0,
+"DU252q12466p1010":49.0,
+"DU252q12466p1030":33.4,
+"DU252q12468p0102":66.0,
+"DU252q12469p1002":34.0,
+"DU252q12470p2430":41.4,
+"DU252q12472p1002":61.6,
+"DU252q12474p0210":68.2,
+"DU252q12475p0230":68.9,
+"DU252q12478p0130":57.3,
+"DU252q12479p0230":66.4,
+"DU252q12481p0230":55.9,
+"DU252q12483p1010":51.8,
+"DU252q12483p1030":52.4,
+"DU252q12484p3020":39.3,
+"DU252q12491p1030":49.6,
+"DU252q12494p0230":56.2,
+"DU252q12496p0105":59.7,
+"DU252q12498p2030":54.2,
+"DU252q12498p2091":55.1,
+"DU252q12499p4070":58.3,
+"DU252q12502p4005":53.1,
+"DU252q12505p3005":48.7,
+"DU252q12506p1530":61.7,
+"DU252q12507p3263":39.5,
+"DU252q12508p0102":48.6,
+"DU252q12509p0106":43.4,
+"DU252q12510p0130":62.2,
+"DU252q12511p1006":40.2,
+"DU252q12513p1040":47.7,
+"DU252q12514p1002":63.7,
+"DU252q12515p2063":60.1,
+"DU252q12516p1530":43.5,
+"DU252q12516p1540":51.6,
+"DU252q12516p1563":52.7,
+"DU252q12517p0240":63.6,
+"DU252q12522p3020":52.5,
+"DU252q12524p0130":64.2,
+"DU252q12527p2030":57.6,
+"DU252q12529p1010":48.7,
+"DU252q12529p1020":44.3,
+"DU252q12529p1030":40.2,
+"DU252q12535p0191":64.0,
+"DU252q12536p4092":60.0,
+"DU252q12540p3043":52.9,
+"DU252q12541p2043":50.0,
+"DU252q12542p0263":58.6,
+"DU252q12543p0191":55.4,
+"DU252q12544p3063":50.7,
+"DU252q12545p0205":58.8,
+"DU252q12546p0130":52.2,
+"DU252q12550p4091":57.6,
+"DU252q12553p0230":53.9,
+"DU252q12554p2030":60.3,
+"DU252q12555p3030":51.4,
+"DU252q12556p0151":62.1,
+"DU252q12557p3262":53.6,
+"DU252q12559p3002":57.3,
+"DU252q12560p0230":55.5,
+"DU252q12560p0260":53.3,
+"DU252q12560p0291":54.0,
+"DU252q12561p3280":46.4,
+"DU252q12563p0130":55.3,
+"DU252q12568p3670":56.8,
+"DU253q12570p4091":49.3,
+"DU253q12573p0430":35.5,
+"DU253q12575p3043":54.7,
+"DU253q12576p3691":45.6,
+"DU253q12577p4020":69.0,
+"DU253q12578p2020":20.5,
+"DU253q12579p2230":38.4,
+"DU253q12580p0130":49.4,
+"DU253q12580p0160":64.2,
+"DU253q12581p3002":52.8,
+"DU253q12585p3130":50.9,
+"DU253q12590p2243":50.2,
+"DU253q12592p3091":44.8,
+"DU253q12594p4082":34.6,
+"DU253q12597p0102":53.0,
+"DU253q12600p3030":54.9,
+"DU253q12601p3630":45.2,
+"DU253q12603p8091":49.4,
+"DU253q12604p8020":57.4,
+"DU253q12604p8030":48.6,
+"DU253q12604p8040":40.0,
+"DU253q12604p8070":37.0,
+"DU253q12604p8080":66.3,
+"DU253q12604p8091":48.8,
+"DU253q12605p3130":51.5,
+"DU253q12607p2030":53.8,
+"DU253q12608p0130":60.3,
+"DU253q12611p3130":33.7,
+"DU253q12612p2002":57.1,
+"DU253q12616p2010":48.7,
+"DU253q12621p3991":39.8,
+"DU253q12622p0130":61.7,
+"DU253q12623p0180":62.5,
+"DU253q12625p3002":47.3,
+"DU253q12628p2010":55.0,
+"DU253q12628p2030":56.0,
+"DU253q12632p1030":57.5,
+"DU253q12634p3653":60.3,
+"DU253q12636p3220":55.5,
+"DU253q12637p4060":48.3,
+"DU253q12640p0211":48.8,
+"DU253q12640p0230":55.0,
+"DU253q12640p0280":53.2,
+"DU253q12641p2030":58.1,
+"DU253q12646p3005":27.8,
+"DU253q12650p0240":49.0,
+"DU253q12651p2420":56.4,
+"DU253q12657p1030":44.2,
+"DU253q12663p2020":27.3,
+"DU253q12664p3602":54.9,
+"DU253q12667p3262":52.8,
+"DU253q12670p1020":46.0,
+"DU253q12670p1030":57.5,
+"DU253q12670p1091":54.5,
+"DU253q12671p3040":52.8,
+"DU253q12672p3040":55.3,
+"DU253q12674p0291":42.4,
+"DU253q12675p1530":49.8,
+"DU253q12677p2091":64.5,
+"DU253q12678p3020":16.7,
+"DU253q12679p3330":33.5,
+"DU253q12680p0130":21.2,
+"DU253q12681p4040":31.4,
+"DU253q12684p0130":56.9,
+"DU253q12686p2030":56.4,
+"DU253q12704p3222":52.3,
+"DU253q12707p3002":58.2,
+"DU253q12708p2030":49.3,
+"DU253q12709p4020":21.9,
+"DU253q12710p2030":30.5,
+"DU253q12711p3020":59.5,
+"DU253q12713p1030":47.4,
+"DU253q12714p3030":18.8,
+"DU253q12716p0130":45.9,
+"DU253q12717p0230":49.1,
+"DU253q12718p3230":45.7,
+"DU253q12719p2730":53.3,
+"DU253q12720p0243":44.5,
+"DU253q12721p2230":34.9,
+"DU253q12722p3091":29.1,
+"DU253q12723p3302":29.3,
+"DU253q12724p4022":43.6,
+"DU253q12731p3330":30.6,
+"DU253q12733p1002":54.0,
+"DU253q12734p3220":28.6,
+"DU254q12735p0191":50.4,
+"DU254q12737p2020":51.5,
+"DU254q12738p2030":34.0,
+"DU254q12739p1030":36.3,
+"DU254q12740p2202":36.7,
+"DU254q12741p1030":62.0,
+"DU254q12745p0230":63.3,
+"DU254q12746p3230":25.7,
+"DU254q12747p0220":28.6,
+"DU254q12761p3240":46.8,
+"DU254q12764p3282":54.0,
+"DU254q12765p0230":53.8,
+"DU254q12766p2530":50.7,
+"DU254q12767p3130":38.3,
+"DU254q12768p1630":58.6,
+"DU254q12768p1680":33.3,
+"DU254q12770p2030":35.2,
+"DU254q12770p2040":27.4,
+"DU254q12773p2230":57.3,
+"DU254q12774p1030":20.8,
+"DU254q12776p0191":55.4,
+"DU254q12777p2030":28.7,
+"DU254q12779p1630":57.0,
+"DU254q12781p1030":57.4,
+"DU254q12781p1040":58.7,
+"DU254q12782p3191":15.7,
+"DU254q12784p8340":63.3,
+"DU254q12785p8540":63.3,
+"DU254q12787p4002":100.0,
+"DU254q12789p3302":12.3,
+"DU254q12792p1016":50.0,
+"DU254q12796p2030":43.9,
+"DU254q12797p1030":60.7,
+"DU254q12798p3282":38.6,
+"DU254q12799p0105":13.7,
+"DU254q12800p1030":24.8,
+"DU254q12800p1080":20.6,
+"DU254q12801p3930":46.8,
+"DU254q12803p0230":43.3,
+"DU254q12804p0250":45.3,
+"DU254q12805p1030":61.0,
+"DU254q12805p1091":59.4,
+"DU254q12806p1040":53.7,
+"DU254q12807p2030":63.1,
+"DU254q12811p3210":32.2,
+"DU254q12813p2020":11.4,
+"DU254q12813p2022":100.0,
+"DU254q12814p4080":41.2,
+"DU254q12815p4002":15.5,
+"DU254q12816p0230":39.6,
+"DU254q12818p2230":100.0,
+"DU254q12821p8030":54.8,
+"DU254q12822p1020":51.8,
+"DU254q12822p1030":37.0,
+"DU254q12822p1091":50.6,
+"DU254q12823p3002":14.8,
+"DU254q12824p3311":5.3,
+"DU254q12825p3011":8.7,
+"DU254q12826p2011":10.0,
+"DU254q12827p3391":16.8,
+"DU254q12828p3905":52.4,
+"DU254q12829p3305":37.5,
+"DU254q12830p3291":32.7,
+"DU254q12831p2030":24.8,
+"DU254q12832p0111":28.8,
+"DU254q12833p1010":32.1,
+"DU254q12833p1020":31.3,
+"DU254q12833p1030":34.5,
+"DU254q12834p1010":24.1,
+"DU254q12834p1030":21.9,
+"DU254q12835p8010":38.1,
+"DU254q12835p8030":41.1,
+"DU254q12836p1091":19.2,
+"DU254q12838p3230":20.0,
+"DU254q12839p8130":32.8,
+"DU254q12840p8010":40.2,
+"DU254q12840p8030":48.0,
+"DU254q12842p2030":25.2,
+"DU254q12850p1030":11.7,
+"DU254q12851p2202":26.2,
+"DU254q12852p3002":26.2,
+"DU254q12855p0205":17.2,
+"DU254q12857p0430":12.3,
+"DU254q12858p0116":22.8,
+"DU254q12859p3930":45.1,
+"DU254q12860p4002":19.4,
+"DU254q12862p1030":38.1,
+"DU254q12867p3220":13.8,
+"DU254q12868p3330":13.2,
+"DU254q12870p3230":18.2,
+"DU254q12872p6520":29.3,
+"DU254q12875p1030":12.9,
+"DU254q12876p2030":34.2,
+"DU254q12881p3244":26.7,
+"DU254q12883p3940":7.2,
+"DU254q12885p0120":14.1,
+"DU254q12888p1010":23.6,
+"DU254q12888p1020":0.0,
+"DU254q12888p1030":22.4,
+"DU254q12890p1010":41.7,
+"DU254q12890p1030":30.2,
+"DU254q12892p1010":24.8,
+"DU254q12892p1020":31.4,
+"DU254q12892p1030":20.2,
+"DU254q12893p4002":13.5,
+"DU254q12895p8080":12.7,
+"DU254q12897p0230":32.9,
+"DU254q12898p3202":10.9,
+"DU254q12900p1030":27.1,
+"DU254q12902p1053":29.5,
+"DU254q12908p2110":11.7,
+"DU254q12909p2110":31.9,
+"DU254q12910p2130":33.3,
+"DU254q12911p2130":30.6,
+"DU254q12912p1010":37.5,
+"DU254q12912p1020":22.2,
+"DU254q12912p1030":33.3,
+"DU254q12916p1030":56.6,
+"DU254q12918p1005":34.4,
+"DU254q12919p1010":14.4,
+"DU254q12920p2043":26.7,
+"DU254q12924p0230":13.6,
+"DU254q12927p1002":57.6,
+"DU254q12929p1020":8.1,
+"DU254q12929p1030":13.5,
+"DU254q12930p2091":27.0,
+"DU254q12931p1330":100.0,
+"DU254q12938p3380":13.6,
+"DU254q12939p2730":19.4,
+"DU254q12941p0130":25.4,
+"DU254q12942p0130":23.1,
+"DU254q12945p3002":27.4,
+"DU254q12948p3302":16.1,
+"DU254q12949p3991":45.0,
+"DU254q12959p3371":18.8,
+"DU254q12960p3002":13.8,
+"DU254q12961p2030":15.2,
+"DU254q12963p3030":9.5,
+"DU254q12965p0230":27.8,
+"DU254q12966p0155":26.6,
+"DU254q12969p1540":61.8,
+"DU254q12970p3202":16.7,
+"DU254q12971p2030":57.5,
+"DU254q12974p1011":55.3,
+"DU254q12975p1030":17.0,
+"DU254q12977p0180":6.6,
+"DU254q12978p0140":8.8,
+"DU254q12979p0130":8.1,
+"DU254q12980p0110":11.2,
+"DU254q12981p3455":1.8,
+"DU254q12982p0130":46.4,
+"DU254q12983p3905":8.1,
+"DU254q12984p4040":54.9,
+"DU254q12985p0182":28.2,
+"DU254q12986p0230":21.7,
+"DU254q12987p4095":8.7,
+"DU254q12989p4002":12.1,
+"DU254q12990p1060":46.4,
+"DU254q12991p0102":50.9,
+"DU254q12991p0140":55.4,
+"DU254q12992p1002":65.8,
+"DU254q12993p0230":69.2,
+"DU254q12996p0230":29.9,
+"DU254q12998p0140":30.2,
+"DU254q13000p0250":22.6,
+"DU254q13002p4020":18.3,
+"DU254q13003p0130":22.1,
+"DU254q13005p0142":42.0,
+"DU254q13006p4002":53.0,
+"DU254q13007p2030":62.8,
+"DU254q13008p0150":51.2,
+"DU254q13009p0102":48.7,
+"DU254q13010p3212":13.1,
+"DU254q13011p2030":45.3,
+"DU254q13013p2030":59.4,
+"DU254q13015p3220":14.5,
+"DU254q13017p2030":56.6,
+"DU254q13019p2030":80.6,
+"DU254q13020p1610":61.1,
+"DU254q13021p4030":52.9,
+"DU254q13023p1302":37.4,
+"DU261q13024p3002":33.7,
+"DU261q13025p0230":49.4,
+"DU261q13026p1110":51.6,
+"DU261q13027p1110":21.4,
+"DU261q13029p1030":33.5,
+"DU261q13030p1030":0.0,
+"DU261q13033p1030":33.8,
+"DU261q13034p0102":18.3,
+"DU261q13035p3030":62.8,
+"DU261q13037p2430":55.1,
+"DU261q13039p1058":34.1,
+"DU261q13040p1540":100.0,
+"DU261q13042p3658":56.1,
+"DU261q13045p0130":66.3,
+"DU261q13046p1030":100.0,
+"DU261q13047p0240":100.0,
+"DU261q13049p0230":59.1,
+"DU261q13056p1005":49.2,
+"DU261q13059p0130":100.0,
+"DU261q13061p1002":100.0,
+"DU261q13062p4060":0.6,
+"DU261q13064p1071":42.9,
+"DU261q13065p1030":44.0,
+"DU261q13069p0260":17.8,
+"DU261q13070p0220":4.0,
+"DU261q13073p1030":30.9,
+"DU261q13074p2030":30.6,
+"DU261q13075p1030":100.0,
+"DU261q13075p1040":46.5,
+"DU261q13076p4002":26.4,
+"DU261q13080p3002":0.0,
+"DU261q13083p1106":100.0,
+"DU261q13086p1070":100.0,
+"DU261q13087p2030":21.3,
+"DU261q13088p1050":100.0,
+"DU261q13090p0130":100.0,
+"DU261q13092p0154":15.7,
+"DU261q13094p4058":100.0,
+"DU261q13096p0252":50.0,
+"DU261q13097p0220":10.9,
+"DU261q13099p1110":0.0,
+"DU261q13100p2002":1.0,
+"DU261q13101p2010":30.3,
+"DU261q13102p1330":0.0,
+"DU261q13103p4002":0.7,
+"DU261q13105p4030":100.0,
+"DU261q13108p0105":0.0,
+"DU261q13111p0130":31.9,
+"DU261q13112p1010":100.0,
+"DU261q13114p1062":2.1,
+"DU261q13117p4063":0.0,
+"DU261q13118p0106":3.2,
+"DU261q13119p1005":34.4,
+"DU261q13120p1030":0.0,
+"DU261q13121p1002":100.0,
+"DU261q13124p4002":0.0,
+"DU261q13125p1530":100.0,
+"DU261q13125p1542":100.0,
+"DU261q13126p2040":35.5,
+"DU261q13127p1091":0.0,
+"DU261q13133p1110":100.0,
+"DU261q13134p0230":100.0,
+"DU261q13140p1002":0.4,
+"DU261q13141p0202":0.0,
+"DU261q13142p4030":0.0,
+"DU261q13147p0170":100.0,
+"DU261q13150p0251":100.0,
+"DU261q13151p1102":100.0,
+"DU261q13154p3002":100.0,
+"DU261q13158p1050":100.0,
+"DU261q13158p1053":100.0,
+"DU261q13161p2091":100.0,
+"DU261q13162p0241":100.0,
+"DU261q13163p1041":100.0,
+"DU261q13165p0210":100.0,
+"DU261q13167p2011":100.0,
+"DU261q13168p0130":100.0,
+"DU261q13178p1060":100.0,
+"DU261q13179p1030":0.0,
+"DU261q13179p1050":0.0,
+"DU261q13179p1070":0.0,
+"DU261q13182p2070":0.0,
+"DU261q13183p2030":0.0,
+"DU261q13186p2030":0.0,
+"DU261q13214p1080":100.0,
+};
+// 根据条码/编码提取尺码：p后面第5位数字（款号=去掉条码最后一位）
+function getSizeFromCode(code) {
+  var pIdx = code.lastIndexOf('p');
+  if (pIdx < 0) return { kuanhao: code.slice(0, -1), sizeLabel: '?' };
+  var afterP = code.slice(pIdx + 1);
+  // 取p后第5位数字（固定位置 = 尺码）
+  var sizeDigit = afterP.charAt(4);  // 第5位（从0开始）
+  var sizeNum = parseInt(sizeDigit);
+  var sizeLabel = (sizeNum >= 0 && sizeNum <= 8) ? SIZE_MAP[sizeNum] : '?';
+  // 款号 = 条码去掉最后一位
+  var kuanhao = code.slice(0, -1);
+  return { kuanhao: kuanhao, sizeLabel: sizeLabel };
+}
+
+var TIME_COLORS = {1:'#22c55e', 2:'#eab308', 3:'#fb923c', 4:'#ef4444'};
+var sheetData = [];
+var allCodes = [];
+var codeMap = {};
+var list = [];
+var previewSizes = [];
+var LS_KEY = 'RETURN_CALC_LIST_V5';
+
+function saveList() { try { localStorage.setItem(LS_KEY, JSON.stringify(list)); } catch(e) {} }
+function loadList() {
+  try {
+    var s = localStorage.getItem(LS_KEY);
+    if (s) { list = JSON.parse(s); list.forEach(function(r) { var b = calcSizeBatches(r); r.batch1 = b.batch1; r.batch2 = b.batch2; r.batch3 = b.batch3; r.batch4 = b.batch4; }); }
+  } catch(e) { list = []; }
+}
+window.onload = function() { loadList(); render(); };     // 当前预览的尺码 {sizeLabel, stock, zqtu, ztime, r2, batch1-4}
+
+// timeSlot: 1=48h, 2=7d, 3=15d, 4=25d
+function calcBatchesFrom(stock, returnRate, timeSlot) {
+  var r = returnRate / 100;
+  var b = { batch1:0, batch2:0, batch3:0, batch4:0 };
+  if (timeSlot === 1) {
+    b.batch1 = Math.floor(stock);
+    b.batch2 = Math.floor(b.batch1 * r);
+    b.batch3 = Math.floor(b.batch2 * r);
+    b.batch4 = Math.floor(b.batch3 * r);
+  } else if (timeSlot === 2) {
+    b.batch2 = Math.floor(stock);
+    b.batch3 = Math.floor(b.batch2 * r);
+    b.batch4 = Math.floor(b.batch3 * r);
+  } else if (timeSlot === 3) {
+    b.batch3 = Math.floor(stock);
+    b.batch4 = Math.floor(b.batch3 * r);
+  } else if (timeSlot === 4) {
+    b.batch4 = Math.floor(stock);
+  }
+  return b;
+}
+
+// 可用库存（timeSlot=1 固定）
+function calcBatches(stock, returnRate) {
+  return calcBatchesFrom(stock, returnRate, 1);
+}
+
+// 计算某尺码的完整批次（含在途）
+function calcSizeBatches(sz) {
+  var r = sz.r2 / 100;
+  var b = { batch1:0, batch2:0, batch3:0, batch4:0 };
+  // 可用库存 → 48h 循环（支持负数）
+  if (sz.stock !== 0) {
+    b.batch1 += Math.floor(sz.stock);
+    b.batch2 += Math.floor(sz.stock * r);
+    b.batch3 += Math.floor(sz.stock * r * r);
+    b.batch4 += Math.floor(sz.stock * r * r * r);
+  }
+  // 在途库存 → 指定批次循环
+  if (sz.zqtu > 0) {
+    if (sz.ztime === 1) {
+      b.batch1 += Math.floor(sz.zqtu);
+      b.batch2 += Math.floor(sz.zqtu * r);
+      b.batch3 += Math.floor(sz.zqtu * r * r);
+      b.batch4 += Math.floor(sz.zqtu * r * r * r);
+    } else if (sz.ztime === 2) {
+      b.batch2 += Math.floor(sz.zqtu);
+      b.batch3 += Math.floor(sz.zqtu * r);
+      b.batch4 += Math.floor(sz.zqtu * r * r);
+    } else if (sz.ztime === 3) {
+      b.batch3 += Math.floor(sz.zqtu);
+      b.batch4 += Math.floor(sz.zqtu * r);
+    } else if (sz.ztime === 4) {
+      b.batch4 += Math.floor(sz.zqtu);
+    }
+  }
+  // 已发库存 → 从7d开始循环
+  if (sz.shipped > 0) {
+    b.batch2 += Math.floor(sz.shipped * r);
+    b.batch3 += Math.floor(sz.shipped * r * r);
+    b.batch4 += Math.floor(sz.shipped * r * r * r);
+  }
+  return b;
+}
+
+// 从 feishu_rates.json（同源文件）拉取最新有货退数据
+function refreshFeishuRates() {
+  var btn = document.getElementById('refreshFeishuBtn');
+  var status = document.getElementById('feishuStatus');
+  if (!btn || !status) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ 更新中...';
+  status.textContent = '🔄 正在拉取最新数据...';
+  status.style.color = '#eab308';
+
+  fetch('/feishu_rates.json?t=' + Date.now())
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      var newRates = data.rates || {};
+      var newCount = Object.keys(newRates).length;
+      var updated = data.meta && data.meta.updated ? data.meta.updated : '';
+      // 合并到全局对象
+      var added = 0;
+      for (var k in newRates) {
+        FEISHU_RETURN_RATES[k] = newRates[k];
+        added++;
+      }
+      var totalCount = Object.keys(FEISHU_RETURN_RATES).length;
+      status.textContent = '✓ 飞书退货率已就绪（共 ' + totalCount + ' 条' + (updated ? '，数据更新于' + updated : '') + '）';
+      status.style.color = '#22c55e';
+      var timeEl = document.getElementById('feishuUpdateTime');
+      if (timeEl) timeEl.textContent = updated ? '数据更新于' + updated : '';
+      btn.textContent = '🔄 更新有货退';
+      btn.disabled = false;
+      showToast('✅ 已更新 ' + newCount + ' 条退货率数据');
+    })
+    .catch(function(err) {
+      status.textContent = '⚠ 更新失败，请联系鲨鱼';
+      status.style.color = '#ef4444';
+      btn.textContent = '🔄 更新有货退';
+      btn.disabled = false;
+      showToast('❌ 更新失败：' + err.message);
+    });
+}
+
+function handleFile(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  showProgress(true, '正在解析...', '0 / 0', file.name);
+
+  sheetData = [];
+  allCodes = [];
+  codeMap = {};
+  list = [];
+  previewSizes = [];
+  document.getElementById('codeSearch').value = '';
+  render();
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, { type: 'array', cellDates: true });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      if (!raw || raw.length < 2) {
+        hideProgress();
+// status removed
+// status removed
+        return;
+      }
+
+      var total = raw.length - 1;
+      var headers = raw[0].map(function(h) { return String(h).replace(/^\uFEFF/, '').trim(); });
+      var idxCode    = headers.findIndex(function(h) { return /商品编码|款号|货号|SKU|style/i.test(h); });
+      var idxBar     = headers.findIndex(function(h) { return /条码|barcode|bar/i.test(h); });
+      var idxStock   = headers.findIndex(function(h) { return h === '可用库存' || /可用库存/i.test(h); });
+      var idxZaitu   = headers.findIndex(function(h) { return h === '在途库存' || /在途|在途库存|在途数/i.test(h); });
+      var idxR2      = headers.findIndex(function(h) { return /有货退/i.test(h); });
+
+      if (idxCode < 0 || idxStock < 0) {
+        hideProgress();
+        alert('未找到列：商品编码=' + idxCode + ' 可用库存=' + idxStock + '\n表头：' + headers.join(' | '));
+        return;
+      }
+
+      // 调试：DU261q13140
+      for (var di = 1; di < raw.length; di++) {
+        var drow = raw[di];
+        var dbar = idxBar >= 0 ? String(drow[idxBar] || '') : '';
+        if (dbar.indexOf('DU261q13140') >= 0) {
+          console.log('★★调试行 di=' + di, 'bar=' + dbar);
+          console.log('★★表头:', headers.slice(0, 13));
+          console.log('★★该行前13列原始值:', JSON.stringify(drow.slice(0, 13)));
+          console.log('★★idxStock=' + idxStock + ' 对应列名=' + headers[idxStock] + ' 该列原始值=', drow[idxStock]);
+          break;
+        }
+      }
+
+      var progEvery = Math.max(1, Math.floor(total / 100));
+
+      for (var i = 1; i < raw.length; i++) {
+        var row = raw[i];
+        var code   = String(row[idxCode] || '').trim();
+        var bar    = idxBar  >= 0 ? String(row[idxBar]  || '').trim() : '';
+        var stockRaw = row[idxStock];
+        var stock  = parseFloat(stockRaw);
+        if (isNaN(stock)) stock = 0;
+        var zaitu  = idxZaitu >= 0 ? parseFloat(row[idxZaitu]) || 0 : 0;
+        // 尺码：条码p后第5位；款号=条码p之前的内容
+        var barOrCode = bar || code;
+        var info = getSizeFromCode(barOrCode);
+        var sizeLabel = info.sizeLabel;
+        var kuanhao = info.kuanhao;
+
+        // 退货率：优先用飞书数据，其次用xlsx原始列，最后默认55%
+        var feishuR2 = FEISHU_RETURN_RATES[kuanhao];
+        var r2 = (feishuR2 !== undefined) ? feishuR2 : (idxR2 >= 0 ? parseFloat(row[idxR2]) || 0 : 0);
+
+        if (!code) continue;
+        if (stock === 0 && zaitu === 0) continue;
+
+        sheetData.push({ code: code, bar: bar, stock: stock, zaitu: zaitu, r2: r2, sizeLabel: sizeLabel, kuanhao: kuanhao });
+
+        if (i % progEvery === 0 || i === raw.length - 1) {
+          var pct = Math.round((i / total) * 100);
+          document.getElementById('progFill').style.width = pct + '%';
+          document.getElementById('progCount').textContent = i + ' / ' + total;
+        }
+      }
+
+      // 聚合：同尺码累加库存+在途
+      sheetData.forEach(function(item) {
+        var returnRate = item.r2 || 55;
+        if (!codeMap[item.kuanhao]) {
+          codeMap[item.kuanhao] = { kuanhao: item.kuanhao, sizes: [], defaultRate: returnRate };
+          allCodes.push(item.kuanhao);
+        }
+        var sizeEntry = codeMap[item.kuanhao].sizes.find(function(s) { return s.sizeLabel === item.sizeLabel; });
+        if (sizeEntry) {
+          sizeEntry.stock += item.stock;
+          sizeEntry.zaitu += item.zaitu;
+        } else {
+          codeMap[item.kuanhao].sizes.push({
+            sizeLabel: item.sizeLabel,
+            stock: item.stock,
+            zaitu: item.zaitu,
+            r2: returnRate,
+            shipped: 0,
+            kuanhao: item.kuanhao
+          });
+        }
+      });
+
+      // 聚合完成后，一次性注入订单已发数据（不重复累加）
+      if (window.orderShippedMap) {
+        (function(){
+          if (!window.orderShippedMap || Object.keys(window.orderShippedMap).length === 0) {
+            return;
+          }
+          Object.keys(codeMap).forEach(function(code) {
+            codeMap[code].sizes.forEach(function(sz) {
+              var orderKey = (sz.kuanhao || '') + '|' + (sz.sizeLabel || '?');
+              var val = window.orderShippedMap[orderKey];
+              if (val !== undefined && val > 0) {
+                sz.shipped = val;
+              }
+            });
+          });
+        })();
+      }
+      var n = sheetData.length;
+      document.getElementById('progFill').style.width = '100%';
+      document.getElementById('progCount').textContent = n + ' / ' + total;
+      document.getElementById('progLabel').textContent = '✓ 导入完成';
+      document.getElementById('uploadStatus').textContent = '📄 ' + file.name + ' ✓ 成功导入 ' + n + ' 条数据';
+      setTimeout(hideProgress, 2000);
+
+      document.getElementById('searchWrap').style.display = 'block';
+      document.getElementById('noFileHint').style.display = 'none';
+      document.getElementById('previewArea').style.display = 'none';
+
+      var sel = document.getElementById('skuSel');
+      sel.innerHTML = '';
+      allCodes.forEach(function(code) {
+        var g = codeMap[code];
+        var totalStock = g.sizes.reduce(function(s, sz) { return s + sz.stock; }, 0);
+        var totalZaitu = g.sizes.reduce(function(s, sz) { return s + sz.zaitu; }, 0);
+        var sizeStr = g.sizes.map(function(sz) { return sz.sizeLabel; }).join('/');
+        var opt = document.createElement('option');
+        opt.value = code;
+        var ztStr = totalZaitu > 0 ? ' 在途:' + totalZaitu : '';
+        opt.textContent = code + '  ' + sizeStr + '（' + totalStock + '件' + ztStr + '）';
+        sel.appendChild(opt);
+      });
+      document.getElementById('searchCount').textContent = '共 ' + allCodes.length + ' 个编码';
+
+    } catch (err) {
+      hideProgress();
+// status removed
+// status removed
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+var manualItems = []; // {id, code, sizeLabel, stock, zqtu, ztime, r2, batch1-4}
+
+function addManualRow() {
+  var code = document.getElementById('mCode').value.trim();
+  var sizeLabel = document.getElementById('mSize').value;
+  var stock = Math.max(0, parseInt(document.getElementById('mStock').value) || 0);
+  var zqtu = Math.max(0, parseInt(document.getElementById('mZqtu').value) || 0);
+  var r2 = Math.max(0, Math.min(100, parseFloat(document.getElementById('mRate').value) || 55));
+  var ztime = parseInt(document.getElementById('mZtime').value) || 2;
+  var shipped = Math.max(0, parseInt(document.getElementById('mShipped').value) || 0);
+
+  if (!code) { return; }
+  if (stock <= 0 && zqtu <= 0 && shipped <= 0) { return; }
+
+  var item = { id: Date.now(), code: code, sizeLabel: sizeLabel, stock: stock, zqtu: zqtu, ztime: ztime, r2: r2, shipped: shipped };
+  var b = calcSizeBatches(item);
+  item.batch1 = b.batch1; item.batch2 = b.batch2; item.batch3 = b.batch3; item.batch4 = b.batch4;
+
+  manualItems.push(item);
+  document.getElementById('mCode').value = '';
+  document.getElementById('mStock').value = '';
+  document.getElementById('mZqtu').value = '';
+  document.getElementById('mRate').value = '55';
+  document.getElementById('mZtime').selectedIndex = 0;
+  document.getElementById('mShipped').value = '';
+  renderManualList();
+}
+
+function delManualRow(id) {
+  manualItems = manualItems.filter(function(r) { return r.id !== id; });
+  renderManualList();
+}
+
+function addAllManual() {
+  if (manualItems.length === 0) return;
+  manualItems.forEach(function(item) {
+    list.push({
+      id: Date.now() + Math.random(),
+      code: item.code,
+      sizeLabel: item.sizeLabel,
+      stock: item.stock,
+      zqtu: item.zqtu,
+      ztime: item.ztime,
+      r2: item.r2,
+      shipped: item.shipped || 0,
+      batch1: item.batch1, batch2: item.batch2,
+      batch3: item.batch3, batch4: item.batch4
+    });
+  });
+  manualItems = [];
+  renderManualList();
+  render();
+  saveList();
+}
+
+function renderManualList() {
+  var el = document.getElementById('manualList');
+  if (manualItems.length === 0) { el.innerHTML = ''; return; }
+  var html = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">';
+  manualItems.forEach(function(item) {
+    var color = item.r2 >= 60 ? '#ef4444' : item.r2 >= 45 ? '#eab308' : '#22c55e';
+    html += '<div style="background:#262626;border:1px solid #333;border-radius:8px;padding:6px 10px;font-size:12px">';
+    html += '<span style="font-weight:600">' + item.code + '</span> ';
+    html += '<span style="color:#9CA3AF">' + item.sizeLabel + '</span> ';
+    html += '<span>库存:' + item.stock + '</span> ';
+    html += '<span style="color:#818cf8">在:' + item.zqtu + '</span> ';
+    html += '<span style="color:#fb923c">发:' + (item.shipped||0) + '</span> ';
+    html += '<span style="color:' + color + '">' + item.r2 + '%</span>';
+    html += ' <span style="color:#ef4444;cursor:pointer;font-size:11px" onclick="delManualRow(' + item.id + ')">✕</span>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button class="bt g2" onclick="addAllManual()" style="flex:1;margin-top:0;padding:8px">✓ 添加到清单</button>';
+  html += '<button class="bt danger" onclick="manualItems=[];renderManualList()" style="flex:none;margin-top:0;padding:8px 12px">清空</button>';
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+
+function handleOrderFile(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  showProgress(true, '正在解析...', '0 / 0', file.name);
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, { type: 'array', cellDates: true });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      if (!raw || raw.length < 2) {
+        hideProgress();
+        return;
+      }
+
+      var headers = raw[0].map(function(h) { return String(h).replace(/^\uFEFF/, '').trim(); });
+      // 商品编码：最后一位数字=尺码
+      var idxCode   = headers.findIndex(function(h) { return /商品编码|款号|货号|SKU/i.test(h); });
+      var idxStatus = headers.findIndex(function(h) { return /订单状态|状态|order.*status/i.test(h); });
+      var idxQty    = headers.findIndex(function(h) { return /数量|件数|qty|num/i.test(h); });
+
+      if (idxCode < 0) {
+        hideProgress();
+        return;
+      }
+
+      // 统计：商品编码最后一位数字=尺码，状态=已发货
+      var shippedMap = {};  // key = code + '|' + sizeLabel, val = count
+      for (var i = 1; i < raw.length; i++) {
+        var row = raw[i];
+        var code = String(row[idxCode] || '').trim();
+        var statusVal = idxStatus >= 0 ? String(row[idxStatus] || '').trim() : '';
+        var rawQty = idxQty >= 0 ? String(row[idxQty] || '1').trim() : '1';
+        var rawNum = parseInt(rawQty.replace(/[^0-9]/g, ''));
+        var qty = (!isNaN(rawNum) && rawNum > 0) ? rawNum : 1;
+
+        // 只统计"已发货"
+        if (String(statusVal).trim() !== '已发货') continue;
+
+        var info = getSizeFromCode(code);
+        var sizeLabel = info.sizeLabel;
+        var key = info.kuanhao + '|' + sizeLabel;  // 款号+尺码
+
+        if (!shippedMap[key]) shippedMap[key] = 0;
+        shippedMap[key] += qty;
+      }
+
+      var totalShipped = 0;
+      var keys = Object.keys(shippedMap);
+      keys.forEach(function(k){ totalShipped += shippedMap[k]; });
+
+      if (keys.length === 0) {
+        hideProgress();
+        return;
+      }
+
+      window.orderShippedMap = shippedMap;
+      document.getElementById('progFill').style.width = '100%';
+      document.getElementById('progCount').textContent = totalShipped + ' 件';
+      document.getElementById('progLabel').textContent = '✓ 识别完成';
+      document.getElementById('orderUploadStatus').textContent = '📦 ' + file.name + ' ✓ 识别到 ' + keys.length + ' 个SKU，共 ' + totalShipped + ' 件已发';
+      setTimeout(hideProgress, 2000);
+
+    } catch (err) {
+      hideProgress();
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function onCodeSearch() {
+  var val = document.getElementById('codeSearch').value;
+  var sel = document.getElementById('skuSel');
+  var prevCode = sel.value;
+
+  sel.innerHTML = '';
+  var filtered = allCodes.filter(function(c) {
+    return c.toLowerCase().indexOf(val.toLowerCase()) !== -1;
+  });
+
+  if (filtered.length === 0) {
+    var opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = val ? '无匹配结果' : '— 选择商品编码 —';
+    sel.appendChild(opt);
+    sel.selectedIndex = 0;
+    document.getElementById('previewArea').style.display = 'none';
+    document.getElementById('noFileHint').style.display = 'block';
+    document.getElementById('searchCount').textContent = '无匹配';
+    return;
+  }
+
+  filtered.forEach(function(code) {
+    var g = codeMap[code];
+    var totalStock = g.sizes.reduce(function(s, sz) { return s + sz.stock; }, 0);
+    var totalZaitu = g.sizes.reduce(function(s, sz) { return s + sz.zaitu; }, 0);
+    var sizeStr = g.sizes.map(function(sz) { return sz.sizeLabel; }).join('/');
+    var opt = document.createElement('option');
+    opt.value = code;
+    var ztStr = totalZaitu > 0 ? ' 在途:' + totalZaitu : '';
+    opt.textContent = code + '  ' + sizeStr + '（' + totalStock + '件' + ztStr + '）';
+    sel.appendChild(opt);
+  });
+
+  var selIdx = filtered.indexOf(prevCode);
+  sel.selectedIndex = selIdx >= 0 ? selIdx : 0;
+  document.getElementById('searchCount').textContent = val ? '找到 ' + filtered.length + ' 个编码' : '共 ' + allCodes.length + ' 个编码';
+  selSKU();
+}
+
+function selSKU() {
+  var code = document.getElementById('skuSel').value;
+  if (!code) {
+    document.getElementById('previewArea').style.display = 'none';
+    document.getElementById('noFileHint').style.display = 'block';
+    return;
+  }
+  document.getElementById('noFileHint').style.display = 'none';
+  document.getElementById('previewArea').style.display = 'block';
+
+  var g = codeMap[code];
+  if (!g) return;
+  previewSizes = g.sizes.map(function(sz) {
+    // 实时从 orderShippedMap 读取已发数据（覆盖库存文件中的默认值）
+    var orderKey = sz.kuanhao + '|' + sz.sizeLabel;  // 与 handleOrderFile 保持完全一致
+    var shippedFromMap = window.orderShippedMap && window.orderShippedMap[orderKey];
+    var shipped = (shippedFromMap > 0) ? shippedFromMap : (sz.shipped || 0);
+    var b = calcSizeBatches({ stock: sz.stock, zqtu: sz.zaitu, ztime: 2, r2: sz.r2, shipped: shipped });
+    return {
+      sizeLabel: sz.sizeLabel,
+      kuanhao: sz.kuanhao || code,
+      stock: sz.stock,
+      zqtu: sz.zaitu || 0,
+      ztime: 2,
+      r2: sz.r2,
+      shipped: shipped,
+      batch1: b.batch1, batch2: b.batch2, batch3: b.batch3, batch4: b.batch4
+    };
+  });
+
+  // 兜底：直接覆写 previewSizes[i].shipped，确保与 orderShippedMap 同步
+  previewSizes.forEach(function(sz, idx) {
+    var k = sz.kuanhao + '|' + sz.sizeLabel;  // 与 handleOrderFile 保持完全一致
+    var m = window.orderShippedMap && window.orderShippedMap[k];
+    sz.shipped = (m > 0) ? m : (sz.shipped || 0);
+  });
+
+  renderPreview();
+}
+
+function renderPreview() {
+  var tbody = document.getElementById('previewBody');
+  tbody.innerHTML = '';
+  var totStock = 0, totZaitu = 0, tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
+
+  previewSizes.forEach(function(sz, idx) {
+    var r2c = sz.r2 >= 60 ? '#ef4444' : sz.r2 >= 45 ? '#eab308' : '#22c55e';
+    var ztimeSel = '<select class="time-select" onchange="updatePreviewZtime(' + idx + ', this.value)" style="width:68px">' +
+      '<option value="1"' + (sz.ztime === 1 ? ' selected' : '') + '>48h</option>' +
+      '<option value="2"' + (sz.ztime === 2 ? ' selected' : '') + '>7d</option>' +
+      '<option value="3"' + (sz.ztime === 3 ? ' selected' : '') + '>15d</option>' +
+      '<option value="4"' + (sz.ztime === 4 ? ' selected' : '') + '>25d</option>' +
+      '</select>';
+    var zqtuVal = sz.zqtu > 0 ? sz.zqtu : '';
+    // 保障：从 orderShippedMap 兜底（防止 previewSizes 还没来得及被 selSKU 注入）
+    var orderKey = sz.kuanhao + '|' + sz.sizeLabel;  // 与 handleOrderFile 保持完全一致
+    var shippedFromMap = window.orderShippedMap && window.orderShippedMap[orderKey];
+    var szShipped = (shippedFromMap > 0) ? shippedFromMap : (sz.shipped > 0 ? sz.shipped : 0);
+    var shippedVal = szShipped > 0 ? szShipped : '';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="size-name">' + sz.sizeLabel + '</td>' +
+      '<td class="r">' + sz.stock + '</td>' +
+      '<td class="r">' +
+        '<div class="zaitu-inline">' +
+          '<input type="number" class="num-input" value="' + zqtuVal + '" placeholder="+" min="0" onchange="updatePreviewZqtu(' + idx + ', this.value)">' +
+          ztimeSel +
+        '</div>' +
+      '</td>' +
+      '<td class="r"><input type="number" class="num-input" value="' + shippedVal + '" placeholder="+" min="0" onchange="updatePreviewShipped(' + idx + ', this.value)"></td>' +
+      '<td class="r"><input class="rate-input" type="number" value="' + sz.r2 + '" min="0" max="100" step="0.1" onchange="updatePreviewRate(' + idx + ', this.value)"></td>' +
+      '<td class="r"><span class="batch-chip chip-48h">' + sz.batch1 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-7d">' + sz.batch2 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-15d">' + sz.batch3 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-25d">' + sz.batch4 + '</span></td>';
+    tbody.appendChild(tr);
+    totStock += sz.stock;
+    totZaitu += sz.zqtu;
+    tot1 += sz.batch1; tot2 += sz.batch2; tot3 += sz.batch3; tot4 += sz.batch4;
+  });
+
+  document.getElementById('pvStock').textContent = totStock;
+  document.getElementById('pvZaitu').textContent = totZaitu;
+  var totShipped = previewSizes.reduce(function(s, sz) { return s + (sz.shipped || 0); }, 0);
+  document.getElementById('pvShipped').textContent = totShipped;
+  document.getElementById('pv48').textContent  = tot1;
+  document.getElementById('pv7').textContent   = tot2;
+  document.getElementById('pv15').textContent  = tot3;
+  document.getElementById('pv25').textContent  = tot4;
+  document.getElementById('pvTotal').textContent = tot1 + tot2 + tot3 + tot4;
+}
+
+function updatePreviewRate(idx, val) {
+  var r2 = Math.max(0, Math.min(100, parseFloat(val) || 0));
+  var sz = previewSizes[idx];
+  sz.r2 = r2;
+  var b = calcSizeBatches(sz);
+  sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+  sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  renderPreview();
+}
+
+function updatePreviewZqtu(idx, val) {
+  var sz = previewSizes[idx];
+  sz.zqtu = Math.max(0, parseInt(val) || 0);
+  var b = calcSizeBatches(sz);
+  sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+  sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  renderPreview();
+}
+
+function updatePreviewZtime(idx, val) {
+  var sz = previewSizes[idx];
+  sz.ztime = parseInt(val) || 2;
+  var b = calcSizeBatches(sz);
+  sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+  sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  renderPreview();
+}
+
+function updatePreviewShipped(idx, val) {
+  var sz = previewSizes[idx];
+  sz.shipped = Math.max(0, parseInt(val) || 0);
+  var b = calcSizeBatches(sz);
+  sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+  sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  renderPreview();
+}
+
+function applyBatchRate() {
+  var rate = Math.max(0, Math.min(100, parseFloat(document.getElementById('batchRateInput').value) || 55));
+  previewSizes.forEach(function(sz) {
+    sz.r2 = rate;
+    var b = calcSizeBatches(sz);
+    sz.batch1 = b.batch1; sz.batch2 = b.batch2; sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  });
+  renderPreview();
+  showToast('✅ 批量设置完成，退货率已更新');
+}
+
+function addAllSizes() {
+  var code = document.getElementById('skuSel').value;
+  if (!code || previewSizes.length === 0) return;
+  list = list.filter(function(r) { return r.code !== code; });
+
+  previewSizes.forEach(function(sz) {
+    list.push({
+      id: Date.now() + Math.random(),
+      code: code,
+      sizeLabel: sz.sizeLabel,
+      stock: sz.stock,
+      zqtu: sz.zqtu,
+      ztime: sz.ztime,
+      r2: sz.r2,
+      shipped: sz.shipped || 0,
+      batch1: sz.batch1, batch2: sz.batch2,
+      batch3: sz.batch3, batch4: sz.batch4
+    });
+  });
+
+  render();
+  saveList();
+  document.getElementById('addAllBtn').textContent = '✓ 已添加';
+}
+
+function clearPreview() {
+  var code = document.getElementById('skuSel').value;
+  if (code) {
+    list = list.filter(function(r) { return r.code !== code; });
+    render();
+    saveList();
+  }
+  previewSizes.forEach(function(sz) {
+    sz.zqtu = 0;
+    sz.ztime = 2;
+    sz.shipped = 0;
+    var b = calcSizeBatches(sz);
+    sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+    sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  });
+  renderPreview();
+  document.getElementById('addAllBtn').textContent = '✓ 添加到清单';
+}
+
+function delRow(id) {
+  list = list.filter(function(r) { return r.id !== id; });
+  render();
+  saveList();
+  document.getElementById('detailArea').style.display = 'none';
+}
+var selectedId = null;
+function selectRow(id) {
+  document.querySelectorAll('#body tr').forEach(function(tr){ tr.classList.remove('selected'); });
+  var el = document.querySelector('#body tr[onclick*="selectRow(' + id + ')"]');
+  if (el) el.classList.add('selected');
+  selectedId = id;
+  var r = list.find(function(item){ return item.id === id; });
+  if (!r) return;
+  var detail = document.getElementById('detailArea');
+  var batches = [
+    {label:'48h发货', val:r.batch1, color:'#22c55e'},
+    {label:'7d发货', val:r.batch2, color:'#eab308'},
+    {label:'15d发货', val:r.batch3, color:'#fb923c'},
+    {label:'25d发货', val:r.batch4, color:'#ef4444'}
+  ];
+  var html = '<div style="padding:12px">';
+  html += '<div style="font-size:12px;color:#9CA3AF;margin-bottom:8px">';
+  html += '<span style="font-weight:700;color:#fff;font-size:14px">' + (r.kuanhao || r.code) + '</span> · ' + r.sizeLabel;
+  html += ' &nbsp;|&nbsp; 库存 <span style="color:#fff">' + r.stock + '</span>';
+  if (r.zqtu > 0) html += ' &nbsp;|&nbsp; 在途 <span style="color:#818cf8">' + r.zqtu + '</span> <span style="color:#6B7280">(' + TIME_MAP[r.ztime] + ')</span>';
+  if ((r.shipped || 0) > 0) html += ' &nbsp;|&nbsp; 已发 <span style="color:#fb923c">' + r.shipped + '</span>';
+  html += ' &nbsp;|&nbsp; 退货率 <span style="color:' + (r.r2>=60?'#ef4444':r.r2>=45?'#eab308':'#22c55e') + ';font-weight:700">' + r.r2 + '%</span>';
+  html += '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">';
+  batches.forEach(function(b){
+    html += '<div style="background:#262626;border-radius:8px;padding:10px;text-align:center">';
+    html += '<div style="font-size:10px;color:#6B7280">' + b.label + '</div>';
+    html += '<div style="font-size:20px;font-weight:700;color:' + b.color + '">' + b.val + '</div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  detail.innerHTML = html;
+  detail.style.display = 'block';
+}
+function clearList() { list = []; render(); saveList(); document.getElementById('detailArea').style.display = 'none'; }
+
+function render() {
+  var tbody = document.getElementById('body');
+  tbody.innerHTML = '';
+
+  var totStock = 0, totZaitu = 0, tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0, totRate = 0, totShipped = 0;
+
+  list.forEach(function(r) {
+    var r2c = r.r2 >= 60 ? '#ef4444' : r.r2 >= 45 ? '#eab308' : '#22c55e';
+    var timeTag = r.zqtu > 0 ? '<span class="zt-chip-inline">' + TIME_MAP[r.ztime] + '</span>' : '';
+    var tr = document.createElement('tr');
+    tr.className = 'list-row';
+    tr.onclick = function(e){ if(e.target.tagName!=='SPAN') selectRow(r.id); };
+    tr.innerHTML =
+      '<td style="font-weight:600">' + (r.kuanhao || r.code) + '</td>' +
+      '<td>' + r.sizeLabel + '</td>' +
+      '<td class="r">' + r.stock + '</td>' +
+      '<td class="r" style="color:#818cf8">' + (r.zqtu > 0 ? r.zqtu : '—') + '</td>' +
+      '<td class="r" style="color:#fb923c">' + ((r.shipped || 0) > 0 ? r.shipped : '—') + '</td>' +
+      '<td>' + timeTag + '</td>' +
+      '<td class="r" style="color:' + r2c + '">' + r.r2 + '%</td>' +
+      '<td class="r"><span class="batch-chip chip-48h">' + r.batch1 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-7d">' + r.batch2 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-15d">' + r.batch3 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-25d">' + r.batch4 + '</span></td>' +
+      '<td><span class="del" onclick="event.stopPropagation();delRow(' + r.id + ')">✕</span></td>';
+    tbody.appendChild(tr);
+
+    totStock += r.stock;
+    totZaitu += r.zqtu || 0;
+    totShipped += r.shipped || 0;
+    tot1 += r.batch1; tot2 += r.batch2; tot3 += r.batch3; tot4 += r.batch4;
+    totRate += r.r2;
+  });
+
+  var cnt = list.length;
+  var uniqCodes = {};
+  list.forEach(function(r) { uniqCodes[r.code] = true; });
+  document.getElementById('cnt').textContent = cnt > 0 ? '（' + cnt + '条，' + Object.keys(uniqCodes).length + '款）' : '';
+  document.getElementById('clearBtn').disabled = cnt === 0;
+  document.getElementById('exportBtn').disabled = cnt === 0;
+
+  if (cnt > 0) {
+    document.getElementById('totStock').textContent  = totStock;
+    document.getElementById('totZaitu').textContent  = totZaitu;
+    document.getElementById('totShipped').textContent  = totShipped;
+    document.getElementById('tot48').textContent  = tot1;
+    document.getElementById('tot7').textContent   = tot2;
+    document.getElementById('tot15').textContent  = tot3;
+    document.getElementById('tot25').textContent  = tot4;
+    document.getElementById('totTotal').textContent = tot1 + tot2 + tot3 + tot4;
+    document.getElementById('totAvgRate').textContent = (totRate / cnt).toFixed(1) + '%';
+    document.getElementById('totArea').style.display = 'block';
+  } else {
+    document.getElementById('totArea').style.display = 'none';
+  }
+  document.getElementById('addAllBtn').textContent = '✓ 添加到清单';
+}
+
+function showProgress(show, label, count, filename) {
+  document.getElementById('progressWrap').style.display = show ? 'block' : 'none';
+  if (show) {
+    document.getElementById('progLabel').textContent = label;
+    document.getElementById('progCount').textContent = count;
+    document.getElementById('progFill').style.width = '0%';
+    if (filename) {
+      document.getElementById('uploadStatus').textContent = '📄 ' + filename;
+      document.getElementById('uploadStatus').style.display = 'block';
+    }
+  } else {
+    document.getElementById('uploadStatus').style.display = 'none';
+  }
+}
+function hideProgress() { document.getElementById('progressWrap').style.display = 'none'; }
+
+// ===== Excel导出 =====
+function exportExcel() {
+  if (list.length === 0) { showToast('清单为空，请先添加数据'); return; }
+  var exportData = list.map(function(r) {
+    return {
+      '款号': r.kuanhao || r.code,
+      '尺码': r.sizeLabel,
+      '库存': r.stock,
+      '在途': r.zqtu || 0,
+      '发货批次': TIME_MAP[r.ztime] || '48h',
+      '已发': r.shipped || 0,
+      '退货率%': r.r2,
+      '48h可发': r.batch1,
+      '7d可发': r.batch2,
+      '15d可发': r.batch3,
+      '25d可发': r.batch4
+    };
+  });
+  var ws = XLSX.utils.json_to_sheet(exportData);
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '退货率计算结果');
+  var fname = '退货率计算_' + new Date().toLocaleDateString('zh-CN').replace(/\//g, '-') + '.xlsx';
+  XLSX.writeFile(wb, fname);
+  showToast('✅ 已导出 ' + list.length + ' 条数据');
+}
+function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(function(){ t.style.display = 'none'; }, 2500); }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<div class="toast" id="toast"></div>
+</body>
+</html>

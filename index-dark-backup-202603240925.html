@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>女装退货率计算器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#0f0f0f;color:#fff;min-height:100vh;padding:16px}
+.cd{background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:12px}
+.tt{font-size:12px;font-weight:600;color:#9CA3AF;margin-bottom:8px;padding-top:12px}
+.tt:first-child{padding-top:0}
+input[type="file"]{display:none}
+label{display:block;background:#262626;border:1px dashed #444;border-radius:10px;padding:20px;text-align:center;cursor:pointer;font-size:13px;color:#6B7280;transition:border-color .2s}
+label:hover{border-color:#6366f1;color:#9CA3AF}
+input{background:#262626;border:1px solid #333;border-radius:8px;padding:8px 10px;font-size:14px;color:#fff;width:100%}
+input:focus{outline:none;border-color:#6366f1}
+input[type="number"]{-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type="text"]{text-align:left}
+select,select option{background:#262626;color:#fff}
+select{border:1px solid #333;border-radius:8px;padding:8px 10px;font-size:14px;width:100%;-webkit-appearance:none}
+select:focus{outline:none;border-color:#6366f1}
+.g{color:#22c55e}.r{color:#ef4444}.w{color:#eab308}.o{color:#fb923c}
+.bt{background:#6366f1;border:none;border-radius:10px;padding:12px;font-size:14px;color:#fff;cursor:pointer;width:100%;font-weight:600;margin-top:10px}
+.bt:active{opacity:0.8}
+.bt.g2{background:#22c55e}
+.bt.danger{background:#374151;color:#9CA3AF}
+.bt:disabled{opacity:0.4;cursor:not-allowed}
+.tb{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px}
+.tb th{font-size:11px;color:#6B7280;padding:5px 6px;text-align:left;font-weight:500;border-bottom:1px solid #2a2a2a;position:sticky;top:0;background:#1a1a1a}
+.tb th.r{text-align:right}
+.tb td{font-size:12px;padding:6px 6px;border-bottom:1px solid #262626;color:#fff}
+.tb td.r{text-align:right}
+.tb td.n{color:#6B7280}
+.tb tr:last-child td{border-bottom:none}
+.tbl-wrap{max-height:500px;overflow-y:auto;border-radius:8px;border:1px solid #2a2a2a}
+.fl{display:flex;gap:8px;margin-bottom:8px}
+.fl>*{flex:1}
+.hint,.ok,.err{font-size:12px;text-align:center;margin-top:6px}
+.ok{color:#22c55e}
+.err{color:#ef4444}
+.hint{color:#6B7280}
+.del{cursor:pointer;color:#ef4444;font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.1)}
+.del:hover{background:rgba(239,68,68,.2)}
+#progressWrap{margin-top:10px}
+#progText{font-size:11px;color:#6B7280;margin-bottom:4px;display:flex;justify-content:space-between}
+#progBar{background:#262626;border-radius:6px;height:6px;overflow:hidden}
+#progFill{height:100%;background:#6366f1;border-radius:6px;transition:width .1s;width:0%}
+.mt{font-size:11px;color:#6B7280;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.search-wrap{position:relative}
+.search-wrap input{padding-left:32px;text-align:left}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#6B7280;pointer-events:none;font-size:14px}
+.search-count{font-size:10px;color:#6B7280;margin-top:4px;text-align:right;min-height:14px}
+.batch-chip{border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;display:inline-block}
+.chip-48h{background:rgba(34,197,94,.2);color:#22c55e}
+.chip-7d{background:rgba(234,179,8,.2);color:#eab308}
+.chip-15d{background:rgba(251,146,60,.2);color:#fb923c}
+.chip-25d{background:rgba(239,68,68,.2);color:#ef4444}
+.size-tag{font-size:10px;padding:1px 5px;border-radius:3px;background:#333;color:#9CA3AF;margin-left:4px}
+.size-name{font-weight:600;font-size:13px}
+#previewArea{margin-top:12px}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px}
+.preview-table th{font-size:10px;color:#6B7280;padding:5px 8px;text-align:center;font-weight:500;border-bottom:1px solid #333;background:#1e1e2e}
+.preview-table th:first-child{text-align:left}
+.preview-table td{font-size:12px;padding:6px 8px;border-bottom:1px solid #262626;text-align:center;color:#fff}
+.preview-table td:first-child{text-align:left}
+.preview-table tr:last-child td{border-bottom:none}
+.rate-input{background:#262626;border:1px solid #333;border-radius:6px;padding:3px 6px;font-size:12px;color:#fff;width:60px;text-align:center}
+.rate-input:focus{outline:none;border-color:#6366f1}
+.num-input{background:#262626;border:1px solid #333;border-radius:6px;padding:3px 6px;font-size:12px;color:#fff;width:70px;text-align:center}
+.num-input:focus{outline:none;border-color:#6366f1}
+.time-select{background:#262626;border:1px solid #333;border-radius:6px;padding:3px 6px;font-size:12px;color:#fff;width:80px}
+.time-select:focus{outline:none;border-color:#6366f1}
+.preview-actions{display:flex;gap:8px;margin-top:10px}
+.preview-actions button{flex:1}
+.size-row td{background:#1c1c1c;padding:4px 6px!important;font-size:11px!important;color:#9CA3AF}
+.size-row td:first-child{padding-left:20px!important}
+.code-row td{font-weight:600}
+.list-row{cursor:pointer;transition:background .15s}
+.list-row:hover td{background:#2a2a3e!important}
+.list-row.selected td{background:#3a3a5c!important}
+.list-row.selected td:first-child{border-left:3px solid #6366f1}
+.toggle-btn{cursor:pointer;font-size:11px;color:#6366f1;margin-right:6px;user-select:none}
+.toggle-btn:hover{color:#818cf8}
+.tot-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:10px}
+.tot-box{background:#1e1e2e;border:1px solid #333;border-radius:10px;padding:12px;text-align:center}
+.tot-box .l{font-size:10px;color:#6B7280;margin-bottom:4px}
+.tot-box .v{font-size:18px;font-weight:700}
+.tot-box .v.g{color:#22c55e}
+.tot-box .v.y{color:#eab308}
+.tot-box .v.o{color:#fb923c}
+.tot-box .v.r2{color:#ef4444}
+.notes{font-size:10px;color:#6B7280;margin-top:8px;line-height:1.6}
+.notes span{display:block}
+.no-data{text-align:center;color:#555;font-size:13px;padding:20px}
+
+/* 在途库存区域 */
+.zaitu-box{background:#1e1e2e;border:1px solid #333;border-radius:10px;padding:12px;margin-top:10px}
+.zaitu-box .zt-title{font-size:11px;color:#9CA3AF;font-weight:600;margin-bottom:8px}
+.zt-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.zt-row>*{flex:none}
+.zt-label{font-size:11px;color:#6B7280;min-width:52px}
+.zt-num{width:80px}
+.zt-sel{width:90px}
+.zt-add{background:#6366f1;border:none;border-radius:8px;padding:5px 12px;font-size:12px;color:#fff;cursor:pointer;flex:none}
+.zt-add:hover{background:#4f46e5}
+.zt-list{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.zt-item{display:flex;align-items:center;gap:4px;background:#262626;border:1px solid #333;border-radius:6px;padding:3px 8px;font-size:11px}
+.zt-item .zt-chip{border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600}
+.zt-item .zt-del{color:#ef4444;cursor:pointer;margin-left:2px;font-size:10px}
+
+/* 在途小计行 */
+.zaitu-sub-row td{background:#1a1a2a;font-size:11px!important;color:#818cf8!important;font-weight:600;border-top:1px dashed #333}
+
+/* 尺码行内的在途输入 */
+.zaitu-inline{display:flex;gap:3px;align-items:center;justify-content:center}
+.zaitu-inline input{width:52px!important;padding:2px 4px!important;font-size:11px!important;height:22px}
+.zaitu-inline select{width:68px!important;padding:2px 4px!important;font-size:11px!important;height:22px}
+.zt-chip-inline{border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600;background:rgba(129,140,248,.2);color:#818cf8}
+</style>
+</head>
+<body>
+<div style="text-align:center;padding:10px 16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);border-radius:10px;margin-bottom:14px">
+  <span style="font-size:13px;font-weight:700;color:#ef4444;text-shadow:0 0 8px #ef4444,0 0 16px rgba(239,68,68,.5)">⚠️ 提示：必须先导入<strong>已发订单文件</strong>，再导入<strong>库存文件</strong>，已发库存才能正确显示</span>
+</div>
+
+<div class="cd">
+  <div class="tt">📂 本地文件导入</div>
+  <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFile(event)">
+  <label for="fileInput">📁 点击上传 CSV 或 Excel 文件<br><span style="font-size:11px;color:#555;margin-top:4px;display:block">支持 .csv / .xlsx / .xls，需包含：商品编码、商品条码、可用库存、在途库存（选填）、已发库存（选填）</span></label>
+  <div id="uploadStatus" style="display:none"></div>
+  <div id="progressWrap" style="display:none">
+    <div id="progText" style="display:flex;justify-content:space-between;font-size:11px;color:#6B7280;margin-bottom:4px">
+      <span id="progLabel">解析中...</span>
+      <span id="progCount">0 / 0</span>
+    </div>
+    <div id="progBar" style="background:#262626;border-radius:6px;height:6px">
+      <div id="progFill" style="height:100%;background:#6366f1;border-radius:6px;transition:width .1s"></div>
+    </div>
+  </div>
+</div>
+
+<div class="cd">
+  <div class="tt">📦 订单导入（已发货统计）</div>
+  <input type="file" id="orderFileInput" accept=".csv,.xlsx,.xls" onchange="handleOrderFile(event)">
+  <label for="orderFileInput">📦 点击上传订单 CSV 或 Excel 文件<br><span style="font-size:11px;color:#555;margin-top:4px;display:block">需包含：商品编码、订单状态（填"已发货"）、数量（按商品编码+尺码归类）</span></label>
+  <div id="orderUploadStatus"></div>
+</div>
+
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+    <div style="flex:1;min-width:90px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">商品编码</div>
+      <input type="text" id="mCode" placeholder="如：A001" style="font-size:13px">
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">尺码</div>
+      <select id="mSize" style="font-size:13px">
+        <option value="F">F</option>
+        <option value="XXS">XXS</option>
+        <option value="XS">XS</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+        <option value="XXL">XXL</option>
+        <option value="XXXL">XXXL</option>
+      </select>
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">库存</div>
+      <input type="number" id="mStock" placeholder="0" min="0" style="font-size:13px">
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">在途</div>
+      <input type="number" id="mZqtu" placeholder="0" min="0" style="font-size:13px">
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">退货率%</div>
+      <input type="number" id="mRate" placeholder="55" min="0" max="100" step="0.1" value="55" style="font-size:13px">
+    </div>
+    <div style="flex:none;min-width:60px">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">已发</div>
+      <input type="number" id="mShipped" placeholder="0" min="0" style="font-size:13px">
+    </div>
+    <div style="flex:none">
+      <div style="font-size:10px;color:#6B7280;margin-bottom:3px">发货时间</div>
+      <select id="mZtime" style="font-size:13px;width:70px">
+        <option value="1">48h</option>
+        <option value="2">7d</option>
+        <option value="3">15d</option>
+        <option value="4">25d</option>
+      </select>
+    </div>
+    <div style="flex:none">
+      <button class="bt" onclick="addManualRow()" style="margin-top:0;padding:7px 14px;font-size:13px">+ 添加</button>
+    </div>
+  </div>
+  <div id="manualList" style="margin-top:10px"></div>
+</div>
+
+<div class="cd">
+  <div class="tt">🔍 选择商品编码查看尺码</div>
+  <div class="search-wrap" id="searchWrap" style="display:none">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="codeSearch" placeholder="输入商品编码搜索..." oninput="onCodeSearch()">
+    <div class="search-count" id="searchCount"></div>
+  </div>
+  <select id="skuSel" onchange="selSKU()"><option value="">— 先上传文件 —</option></select>
+  <div id="previewArea" style="display:none">
+    <div class="tbl-wrap" style="max-height:350px">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>尺码</th>
+            <th>库存</th>
+            <th>在途</th>
+            <th>已发</th>
+            <th>退货率</th>
+            <th>48h</th>
+            <th>7d</th>
+            <th>15d</th>
+            <th>25d</th>
+          </tr>
+        </thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+
+    <div id="previewTotals" style="background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:10px 12px;margin-top:10px">
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">可用库存</div>
+          <div style="font-size:16px;font-weight:700" id="pvStock">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">在途库存</div>
+          <div style="font-size:16px;font-weight:700;color:#818cf8" id="pvZaitu">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">已发库存</div>
+          <div style="font-size:16px;font-weight:700;color:#fb923c" id="pvShipped">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">48h可发</div>
+          <div style="font-size:16px;font-weight:700;color:#22c55e" id="pv48">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">7d可发</div>
+          <div style="font-size:16px;font-weight:700;color:#eab308" id="pv7">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">15d可发</div>
+          <div style="font-size:16px;font-weight:700;color:#fb923c" id="pv15">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">25d可发</div>
+          <div style="font-size:16px;font-weight:700;color:#ef4444" id="pv25">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">总可发</div>
+          <div style="font-size:16px;font-weight:700;color:#fff" id="pvTotal">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="preview-actions">
+      <button class="bt g2" id="addAllBtn" onclick="addAllSizes()">✓ 添加到清单</button>
+      <button class="bt danger" onclick="clearPreview()">清空</button>
+    </div>
+  </div>
+  <div id="noFileHint" class="no-data">上传文件后即可选择商品编码</div>
+</div>
+
+<div class="cd">
+  <div class="tt">📋 计算清单 <span id="cnt" style="font-weight:400;color:#6B7280"></span></div>
+  <div class="tbl-wrap">
+    <table class="tb">
+      <thead>
+        <tr>
+          <th>商品编码</th>
+          <th>尺码</th>
+          <th class="r">库存</th>
+          <th class="r">在途</th>
+          <th class="r">已发</th>
+          <th>发货</th>
+          <th class="r">退货率</th>
+          <th class="r">48h</th>
+          <th class="r">7d</th>
+          <th class="r">15d</th>
+          <th class="r">25d</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+  <div id="detailArea" style="display:none;margin-top:8px"></div>
+  <div id="totArea" style="display:none">
+    <div class="tot-grid">
+      <div class="tot-box"><div class="l">合计可用库存</div><div class="v" id="totStock">0</div></div>
+      <div class="tot-box"><div class="l">合计在途</div><div class="v" id="totZaitu">0</div></div>
+      <div class="tot-box"><div class="l">合计已发</div><div class="v o" id="totShipped">0</div></div>
+      <div class="tot-box"><div class="l">合计48h</div><div class="v g" id="tot48">0</div></div>
+      <div class="tot-box"><div class="l">合计7d</div><div class="v y" id="tot7">0</div></div>
+    </div>
+    <div class="tot-grid" style="margin-top:8px">
+      <div class="tot-box"><div class="l">合计15d</div><div class="v o" id="tot15">0</div></div>
+      <div class="tot-box"><div class="l">合计25d</div><div class="v r2" id="tot25">0</div></div>
+      <div class="tot-box"><div class="l">最大总可发</div><div class="v" id="totTotal">0</div></div>
+      <div class="tot-box"><div class="l">平均退货率</div><div class="v" id="totAvgRate">—</div></div>
+    </div>
+  </div>
+  <button class="bt danger" onclick="clearList()" style="margin-top:8px" id="clearBtn" disabled>🗑 清空清单</button>
+  <div class="notes">
+    <span>💡 <strong>逻辑：</strong>可用库存：48h发，退回进入7d→15d→25d循环。在途库存：进入指定批次，如选7天则直接作为7d发货，退回进15d→25d</span>
+  </div>
+</div>
+
+<div class="cd">
+  <div class="tt">📖 尺码参照（条码末位）</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <span class="mt">0 → F</span>
+    <span class="mt">1 → XXS</span>
+    <span class="mt">2 → XS</span>
+    <span class="mt">3 → S</span>
+    <span class="mt">4 → M</span>
+    <span class="mt">5 → L</span>
+    <span class="mt">6 → XL</span>
+    <span class="mt">7 → XXL</span>
+    <span class="mt">8 → XXXL</span>
+  </div>
+</div>
+
+<script>
+var SIZE_MAP = {0:'F',1:'XXS',2:'XS',3:'S',4:'M',5:'L',6:'XL',7:'XXL',8:'XXXL'};
+var TIME_MAP = {1:'48h', 2:'7d', 3:'15d', 4:'25d'};
+// 根据条码/编码提取尺码：p后面第5位数字（款号=去p及之后的内容）
+function getSizeFromCode(code) {
+  var pIdx = code.indexOf('p');
+  if (pIdx < 0) return { kuanhao: code, sizeLabel: '?' };
+  var kuanhao = code.slice(0, pIdx);
+  var afterP = code.slice(pIdx + 1);
+  // 取p后第5位数字（固定位置 = 尺码）
+  var sizeDigit = afterP.charAt(4);  // 第5位（从0开始）
+  var sizeNum = parseInt(sizeDigit);
+  var sizeLabel = (sizeNum >= 0 && sizeNum <= 8) ? SIZE_MAP[sizeNum] : '?';
+  return { kuanhao: kuanhao, sizeLabel: sizeLabel };
+}
+
+var TIME_COLORS = {1:'#22c55e', 2:'#eab308', 3:'#fb923c', 4:'#ef4444'};
+var sheetData = [];
+var allCodes = [];
+var codeMap = {};
+var list = [];
+var previewSizes = [];     // 当前预览的尺码 {sizeLabel, stock, zqtu, ztime, r2, batch1-4}
+
+// timeSlot: 1=48h, 2=7d, 3=15d, 4=25d
+function calcBatchesFrom(stock, returnRate, timeSlot) {
+  var r = returnRate / 100;
+  var b = { batch1:0, batch2:0, batch3:0, batch4:0 };
+  if (timeSlot === 1) {
+    b.batch1 = Math.floor(stock);
+    b.batch2 = Math.floor(b.batch1 * r);
+    b.batch3 = Math.floor(b.batch2 * r);
+    b.batch4 = Math.floor(b.batch3 * r);
+  } else if (timeSlot === 2) {
+    b.batch2 = Math.floor(stock);
+    b.batch3 = Math.floor(b.batch2 * r);
+    b.batch4 = Math.floor(b.batch3 * r);
+  } else if (timeSlot === 3) {
+    b.batch3 = Math.floor(stock);
+    b.batch4 = Math.floor(b.batch3 * r);
+  } else if (timeSlot === 4) {
+    b.batch4 = Math.floor(stock);
+  }
+  return b;
+}
+
+// 可用库存（timeSlot=1 固定）
+function calcBatches(stock, returnRate) {
+  return calcBatchesFrom(stock, returnRate, 1);
+}
+
+// 计算某尺码的完整批次（含在途）
+function calcSizeBatches(sz) {
+  var r = sz.r2 / 100;
+  var b = { batch1:0, batch2:0, batch3:0, batch4:0 };
+  // 可用库存 → 48h 循环
+  if (sz.stock > 0) {
+    b.batch1 += Math.floor(sz.stock);
+    b.batch2 += Math.floor(sz.stock * r);
+    b.batch3 += Math.floor(sz.stock * r * r);
+    b.batch4 += Math.floor(sz.stock * r * r * r);
+  }
+  // 在途库存 → 指定批次循环
+  if (sz.zqtu > 0) {
+    if (sz.ztime === 1) {
+      b.batch1 += Math.floor(sz.zqtu);
+      b.batch2 += Math.floor(sz.zqtu * r);
+      b.batch3 += Math.floor(sz.zqtu * r * r);
+      b.batch4 += Math.floor(sz.zqtu * r * r * r);
+    } else if (sz.ztime === 2) {
+      b.batch2 += Math.floor(sz.zqtu);
+      b.batch3 += Math.floor(sz.zqtu * r);
+      b.batch4 += Math.floor(sz.zqtu * r * r);
+    } else if (sz.ztime === 3) {
+      b.batch3 += Math.floor(sz.zqtu);
+      b.batch4 += Math.floor(sz.zqtu * r);
+    } else if (sz.ztime === 4) {
+      b.batch4 += Math.floor(sz.zqtu);
+    }
+  }
+  // 已发库存 → 从7d开始循环
+  if (sz.shipped > 0) {
+    b.batch2 += Math.floor(sz.shipped * r);
+    b.batch3 += Math.floor(sz.shipped * r * r);
+    b.batch4 += Math.floor(sz.shipped * r * r * r);
+  }
+  return b;
+}
+
+function handleFile(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  showProgress(true, '正在解析...', '0 / 0', file.name);
+
+  sheetData = [];
+  allCodes = [];
+  codeMap = {};
+  list = [];
+  previewSizes = [];
+  document.getElementById('codeSearch').value = '';
+  render();
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, { type: 'array', cellDates: true });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      if (!raw || raw.length < 2) {
+        hideProgress();
+// status removed
+// status removed
+        return;
+      }
+
+      var total = raw.length - 1;
+      var headers = raw[0].map(function(h) { return String(h).replace(/^﻿/, '').trim(); });
+      var idxCode    = headers.findIndex(function(h) { return /商品编码|款号|货号|SKU|style/i.test(h); });
+      var idxBar     = headers.findIndex(function(h) { return /条码|barcode|bar/i.test(h); });
+      var idxStock   = headers.findIndex(function(h) { return /可用库存|可用|库存|stock|现货/i.test(h); });
+      var idxZaitu   = headers.findIndex(function(h) { return /在途|在途库存|在途数/i.test(h); });
+      var idxR2      = headers.findIndex(function(h) { return /有货退/i.test(h); });
+
+      if (idxCode < 0 || idxStock < 0) {
+        hideProgress();
+// status removed
+// status removed
+        return;
+      }
+
+      var progEvery = Math.max(1, Math.floor(total / 100));
+
+      for (var i = 1; i < raw.length; i++) {
+        var row = raw[i];
+        var code   = String(row[idxCode] || '').trim();
+        var bar    = idxBar  >= 0 ? String(row[idxBar]  || '').trim() : '';
+        var stock  = parseFloat(row[idxStock]) || 0;
+        var zaitu  = idxZaitu >= 0 ? parseFloat(row[idxZaitu]) || 0 : 0;
+        var r2     = idxR2   >= 0 ? parseFloat(row[idxR2])  || 0 : 0;
+
+        if (!code) continue;
+        if (stock <= 0 && zaitu <= 0) continue;
+
+        // 尺码：条码p后第5位；款号=条码p之前的内容
+        var barOrCode = bar || code;
+        var info = getSizeFromCode(barOrCode);
+        var sizeLabel = info.sizeLabel;
+
+        sheetData.push({ code: code, bar: bar, stock: stock, zaitu: zaitu, r2: r2, sizeLabel: sizeLabel, kuanhao: info.kuanhao });
+
+        if (i % progEvery === 0 || i === raw.length - 1) {
+          var pct = Math.round((i / total) * 100);
+          document.getElementById('progFill').style.width = pct + '%';
+          document.getElementById('progCount').textContent = i + ' / ' + total;
+        }
+      }
+
+      // 聚合：同尺码累加库存+在途
+      sheetData.forEach(function(item) {
+        var returnRate = item.r2 || 55;
+        if (!codeMap[item.kuanhao]) {
+          codeMap[item.kuanhao] = { kuanhao: item.kuanhao, sizes: [], defaultRate: returnRate };
+          allCodes.push(item.kuanhao);
+        }
+        var sizeEntry = codeMap[item.kuanhao].sizes.find(function(s) { return s.sizeLabel === item.sizeLabel; });
+        if (sizeEntry) {
+          sizeEntry.stock += item.stock;
+          sizeEntry.zaitu += item.zaitu;
+        } else {
+          codeMap[item.kuanhao].sizes.push({
+            sizeLabel: item.sizeLabel,
+            stock: item.stock,
+            zaitu: item.zaitu,
+            r2: returnRate,
+            shipped: 0,
+            kuanhao: item.kuanhao
+          });
+        }
+      });
+
+      // 聚合完成后，一次性注入订单已发数据（不重复累加）
+      if (window.orderShippedMap) {
+        (function(){
+          if (!window.orderShippedMap || Object.keys(window.orderShippedMap).length === 0) {
+            return;
+          }
+          Object.keys(codeMap).forEach(function(code) {
+            codeMap[code].sizes.forEach(function(sz) {
+              var orderKey = (sz.kuanhao || '') + '|' + (sz.sizeLabel || '?');
+              var val = window.orderShippedMap[orderKey];
+              if (val !== undefined && val > 0) {
+                sz.shipped = val;
+              }
+            });
+          });
+        })();
+      }
+      var n = sheetData.length;
+      document.getElementById('progFill').style.width = '100%';
+      document.getElementById('progCount').textContent = n + ' / ' + total;
+      document.getElementById('progLabel').textContent = '✓ 导入完成';
+      document.getElementById('uploadStatus').textContent = '📄 ' + file.name + ' ✓ 成功导入 ' + n + ' 条数据';
+      setTimeout(hideProgress, 2000);
+
+      document.getElementById('searchWrap').style.display = 'block';
+      document.getElementById('noFileHint').style.display = 'none';
+      document.getElementById('previewArea').style.display = 'none';
+
+      var sel = document.getElementById('skuSel');
+      sel.innerHTML = '';
+      allCodes.forEach(function(code) {
+        var g = codeMap[code];
+        var totalStock = g.sizes.reduce(function(s, sz) { return s + sz.stock; }, 0);
+        var totalZaitu = g.sizes.reduce(function(s, sz) { return s + sz.zaitu; }, 0);
+        var sizeStr = g.sizes.map(function(sz) { return sz.sizeLabel; }).join('/');
+        var opt = document.createElement('option');
+        opt.value = code;
+        var ztStr = totalZaitu > 0 ? ' 在途:' + totalZaitu : '';
+        opt.textContent = code + '  ' + sizeStr + '（' + totalStock + '件' + ztStr + '）';
+        sel.appendChild(opt);
+      });
+      document.getElementById('searchCount').textContent = '共 ' + allCodes.length + ' 个编码';
+
+    } catch (err) {
+      hideProgress();
+// status removed
+// status removed
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+var manualItems = []; // {id, code, sizeLabel, stock, zqtu, ztime, r2, batch1-4}
+
+function addManualRow() {
+  var code = document.getElementById('mCode').value.trim();
+  var sizeLabel = document.getElementById('mSize').value;
+  var stock = Math.max(0, parseInt(document.getElementById('mStock').value) || 0);
+  var zqtu = Math.max(0, parseInt(document.getElementById('mZqtu').value) || 0);
+  var r2 = Math.max(0, Math.min(100, parseFloat(document.getElementById('mRate').value) || 55));
+  var ztime = parseInt(document.getElementById('mZtime').value) || 1;
+  var shipped = Math.max(0, parseInt(document.getElementById('mShipped').value) || 0);
+
+  if (!code) { return; }
+  if (stock <= 0 && zqtu <= 0 && shipped <= 0) { return; }
+
+  var item = { id: Date.now(), code: code, sizeLabel: sizeLabel, stock: stock, zqtu: zqtu, ztime: ztime, r2: r2, shipped: shipped };
+  var b = calcSizeBatches(item);
+  item.batch1 = b.batch1; item.batch2 = b.batch2; item.batch3 = b.batch3; item.batch4 = b.batch4;
+
+  manualItems.push(item);
+  document.getElementById('mCode').value = '';
+  document.getElementById('mStock').value = '';
+  document.getElementById('mZqtu').value = '';
+  document.getElementById('mRate').value = '55';
+  document.getElementById('mZtime').selectedIndex = 0;
+  document.getElementById('mShipped').value = '';
+  renderManualList();
+}
+
+function delManualRow(id) {
+  manualItems = manualItems.filter(function(r) { return r.id !== id; });
+  renderManualList();
+}
+
+function addAllManual() {
+  if (manualItems.length === 0) return;
+  manualItems.forEach(function(item) {
+    list.push({
+      id: Date.now() + Math.random(),
+      code: item.code,
+      sizeLabel: item.sizeLabel,
+      stock: item.stock,
+      zqtu: item.zqtu,
+      ztime: item.ztime,
+      r2: item.r2,
+      shipped: item.shipped || 0,
+      batch1: item.batch1, batch2: item.batch2,
+      batch3: item.batch3, batch4: item.batch4
+    });
+  });
+  manualItems = [];
+  renderManualList();
+  render();
+}
+
+function renderManualList() {
+  var el = document.getElementById('manualList');
+  if (manualItems.length === 0) { el.innerHTML = ''; return; }
+  var html = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">';
+  manualItems.forEach(function(item) {
+    var color = item.r2 >= 60 ? '#ef4444' : item.r2 >= 45 ? '#eab308' : '#22c55e';
+    html += '<div style="background:#262626;border:1px solid #333;border-radius:8px;padding:6px 10px;font-size:12px">';
+    html += '<span style="font-weight:600">' + item.code + '</span> ';
+    html += '<span style="color:#9CA3AF">' + item.sizeLabel + '</span> ';
+    html += '<span>库存:' + item.stock + '</span> ';
+    html += '<span style="color:#818cf8">在:' + item.zqtu + '</span> ';
+    html += '<span style="color:#fb923c">发:' + (item.shipped||0) + '</span> ';
+    html += '<span style="color:' + color + '">' + item.r2 + '%</span>';
+    html += ' <span style="color:#ef4444;cursor:pointer;font-size:11px" onclick="delManualRow(' + item.id + ')">✕</span>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button class="bt g2" onclick="addAllManual()" style="flex:1;margin-top:0;padding:8px">✓ 添加到清单</button>';
+  html += '<button class="bt danger" onclick="manualItems=[];renderManualList()" style="flex:none;margin-top:0;padding:8px 12px">清空</button>';
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+
+function handleOrderFile(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  showProgress(true, '正在解析...', '0 / 0', file.name);
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, { type: 'array', cellDates: true });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      if (!raw || raw.length < 2) {
+        hideProgress();
+        return;
+      }
+
+      var headers = raw[0].map(function(h) { return String(h).replace(/^﻿/, '').trim(); });
+      // 商品编码：最后一位数字=尺码
+      var idxCode   = headers.findIndex(function(h) { return /商品编码|款号|货号|SKU/i.test(h); });
+      var idxStatus = headers.findIndex(function(h) { return /订单状态|状态|order.*status/i.test(h); });
+      var idxQty    = headers.findIndex(function(h) { return /数量|件数|qty|num/i.test(h); });
+
+      if (idxCode < 0) {
+        hideProgress();
+        return;
+      }
+
+      // 统计：商品编码最后一位数字=尺码，状态=已发货
+      var shippedMap = {};  // key = code + '|' + sizeLabel, val = count
+      for (var i = 1; i < raw.length; i++) {
+        var row = raw[i];
+        var code = String(row[idxCode] || '').trim();
+        var statusVal = idxStatus >= 0 ? String(row[idxStatus] || '').trim() : '';
+        var rawQty = idxQty >= 0 ? String(row[idxQty] || '1').trim() : '1';
+        var rawNum = parseInt(rawQty.replace(/[^0-9]/g, ''));
+        var qty = (!isNaN(rawNum) && rawNum > 0) ? rawNum : 1;
+
+        // 只统计"已发货"
+        if (String(statusVal).trim() !== '已发货') continue;
+
+        var info = getSizeFromCode(code);
+        var sizeLabel = info.sizeLabel;
+        var key = info.kuanhao + '|' + sizeLabel;  // 款号+尺码
+
+        if (!shippedMap[key]) shippedMap[key] = 0;
+        shippedMap[key] += qty;
+      }
+
+      var totalShipped = 0;
+      var keys = Object.keys(shippedMap);
+      keys.forEach(function(k){ totalShipped += shippedMap[k]; });
+
+      if (keys.length === 0) {
+        hideProgress();
+        return;
+      }
+
+      window.orderShippedMap = shippedMap;
+      document.getElementById('progFill').style.width = '100%';
+      document.getElementById('progCount').textContent = totalShipped + ' 件';
+      document.getElementById('progLabel').textContent = '✓ 识别完成';
+      document.getElementById('orderUploadStatus').textContent = '📦 ' + file.name + ' ✓ 识别到 ' + keys.length + ' 个SKU，共 ' + totalShipped + ' 件已发';
+      setTimeout(hideProgress, 2000);
+
+    } catch (err) {
+      hideProgress();
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function onCodeSearch() {
+  var val = document.getElementById('codeSearch').value;
+  var sel = document.getElementById('skuSel');
+  var prevCode = sel.value;
+
+  sel.innerHTML = '';
+  var filtered = allCodes.filter(function(c) {
+    return c.toLowerCase().indexOf(val.toLowerCase()) !== -1;
+  });
+
+  if (filtered.length === 0) {
+    var opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = val ? '无匹配结果' : '— 选择商品编码 —';
+    sel.appendChild(opt);
+    sel.selectedIndex = 0;
+    document.getElementById('previewArea').style.display = 'none';
+    document.getElementById('noFileHint').style.display = 'block';
+    document.getElementById('searchCount').textContent = '无匹配';
+    return;
+  }
+
+  filtered.forEach(function(code) {
+    var g = codeMap[code];
+    var totalStock = g.sizes.reduce(function(s, sz) { return s + sz.stock; }, 0);
+    var totalZaitu = g.sizes.reduce(function(s, sz) { return s + sz.zaitu; }, 0);
+    var sizeStr = g.sizes.map(function(sz) { return sz.sizeLabel; }).join('/');
+    var opt = document.createElement('option');
+    opt.value = code;
+    var ztStr = totalZaitu > 0 ? ' 在途:' + totalZaitu : '';
+    opt.textContent = code + '  ' + sizeStr + '（' + totalStock + '件' + ztStr + '）';
+    sel.appendChild(opt);
+  });
+
+  var selIdx = filtered.indexOf(prevCode);
+  sel.selectedIndex = selIdx >= 0 ? selIdx : 0;
+  document.getElementById('searchCount').textContent = val ? '找到 ' + filtered.length + ' 个编码' : '共 ' + allCodes.length + ' 个编码';
+  selSKU();
+}
+
+function selSKU() {
+  var code = document.getElementById('skuSel').value;
+  if (!code) {
+    document.getElementById('previewArea').style.display = 'none';
+    document.getElementById('noFileHint').style.display = 'block';
+    return;
+  }
+  document.getElementById('noFileHint').style.display = 'none';
+  document.getElementById('previewArea').style.display = 'block';
+
+  var g = codeMap[code];
+  if (!g) return;
+  previewSizes = g.sizes.map(function(sz) {
+    // 实时从 orderShippedMap 读取已发数据（覆盖库存文件中的默认值）
+    var orderKey = sz.kuanhao + '|' + sz.sizeLabel;  // 与 handleOrderFile 保持完全一致
+    var shippedFromMap = window.orderShippedMap && window.orderShippedMap[orderKey];
+    var shipped = (shippedFromMap > 0) ? shippedFromMap : (sz.shipped || 0);
+    var b = calcSizeBatches({ stock: sz.stock, zqtu: sz.zaitu, ztime: 1, r2: sz.r2, shipped: shipped });
+    return {
+      sizeLabel: sz.sizeLabel,
+      kuanhao: sz.kuanhao || code,
+      stock: sz.stock,
+      zqtu: sz.zaitu || 0,
+      ztime: 1,
+      r2: sz.r2,
+      shipped: shipped,
+      batch1: b.batch1, batch2: b.batch2, batch3: b.batch3, batch4: b.batch4
+    };
+  });
+
+  // 兜底：直接覆写 previewSizes[i].shipped，确保与 orderShippedMap 同步
+  previewSizes.forEach(function(sz, idx) {
+    var k = sz.kuanhao + '|' + sz.sizeLabel;  // 与 handleOrderFile 保持完全一致
+    var m = window.orderShippedMap && window.orderShippedMap[k];
+    sz.shipped = (m > 0) ? m : (sz.shipped || 0);
+  });
+
+  renderPreview();
+}
+
+function renderPreview() {
+  var tbody = document.getElementById('previewBody');
+  tbody.innerHTML = '';
+  var totStock = 0, totZaitu = 0, tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
+
+  previewSizes.forEach(function(sz, idx) {
+    var r2c = sz.r2 >= 60 ? '#ef4444' : sz.r2 >= 45 ? '#eab308' : '#22c55e';
+    var ztimeSel = '<select class="time-select" onchange="updatePreviewZtime(' + idx + ', this.value)" style="width:68px">' +
+      '<option value="1"' + (sz.ztime === 1 ? ' selected' : '') + '>48h</option>' +
+      '<option value="2"' + (sz.ztime === 2 ? ' selected' : '') + '>7d</option>' +
+      '<option value="3"' + (sz.ztime === 3 ? ' selected' : '') + '>15d</option>' +
+      '<option value="4"' + (sz.ztime === 4 ? ' selected' : '') + '>25d</option>' +
+      '</select>';
+    var zqtuVal = sz.zqtu > 0 ? sz.zqtu : '';
+    // 保障：从 orderShippedMap 兜底（防止 previewSizes 还没来得及被 selSKU 注入）
+    var orderKey = sz.kuanhao + '|' + sz.sizeLabel;  // 与 handleOrderFile 保持完全一致
+    var shippedFromMap = window.orderShippedMap && window.orderShippedMap[orderKey];
+    var szShipped = (shippedFromMap > 0) ? shippedFromMap : (sz.shipped > 0 ? sz.shipped : 0);
+    var shippedVal = szShipped > 0 ? szShipped : '';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="size-name">' + sz.sizeLabel + '</td>' +
+      '<td class="r">' + sz.stock + '</td>' +
+      '<td class="r">' +
+        '<div class="zaitu-inline">' +
+          '<input type="number" class="num-input" value="' + zqtuVal + '" placeholder="+" min="0" onchange="updatePreviewZqtu(' + idx + ', this.value)">' +
+          ztimeSel +
+        '</div>' +
+      '</td>' +
+      '<td class="r"><input type="number" class="num-input" value="' + shippedVal + '" placeholder="+" min="0" onchange="updatePreviewShipped(' + idx + ', this.value)"></td>' +
+      '<td class="r"><input class="rate-input" type="number" value="' + sz.r2 + '" min="0" max="100" step="0.1" onchange="updatePreviewRate(' + idx + ', this.value)"></td>' +
+      '<td class="r"><span class="batch-chip chip-48h">' + sz.batch1 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-7d">' + sz.batch2 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-15d">' + sz.batch3 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-25d">' + sz.batch4 + '</span></td>';
+    tbody.appendChild(tr);
+    totStock += sz.stock;
+    totZaitu += sz.zqtu;
+    tot1 += sz.batch1; tot2 += sz.batch2; tot3 += sz.batch3; tot4 += sz.batch4;
+  });
+
+  document.getElementById('pvStock').textContent = totStock;
+  document.getElementById('pvZaitu').textContent = totZaitu;
+  var totShipped = previewSizes.reduce(function(s, sz) { return s + (sz.shipped || 0); }, 0);
+  document.getElementById('pvShipped').textContent = totShipped;
+  document.getElementById('pv48').textContent  = tot1;
+  document.getElementById('pv7').textContent   = tot2;
+  document.getElementById('pv15').textContent  = tot3;
+  document.getElementById('pv25').textContent  = tot4;
+  document.getElementById('pvTotal').textContent = tot1 + tot2 + tot3 + tot4;
+}
+
+function updatePreviewRate(idx, val) {
+  var r2 = Math.max(0, Math.min(100, parseFloat(val) || 0));
+  var sz = previewSizes[idx];
+  sz.r2 = r2;
+  var b = calcSizeBatches(sz);
+  sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+  sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  renderPreview();
+}
+
+function updatePreviewZqtu(idx, val) {
+  var sz = previewSizes[idx];
+  sz.zqtu = Math.max(0, parseInt(val) || 0);
+  var b = calcSizeBatches(sz);
+  sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+  sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  renderPreview();
+}
+
+function updatePreviewZtime(idx, val) {
+  var sz = previewSizes[idx];
+  sz.ztime = parseInt(val) || 1;
+  var b = calcSizeBatches(sz);
+  sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+  sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  renderPreview();
+}
+
+function updatePreviewShipped(idx, val) {
+  var sz = previewSizes[idx];
+  sz.shipped = Math.max(0, parseInt(val) || 0);
+  var b = calcSizeBatches(sz);
+  sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+  sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  renderPreview();
+}
+
+function addAllSizes() {
+  var code = document.getElementById('skuSel').value;
+  if (!code || previewSizes.length === 0) return;
+  list = list.filter(function(r) { return r.code !== code; });
+
+  previewSizes.forEach(function(sz) {
+    list.push({
+      id: Date.now() + Math.random(),
+      code: code,
+      sizeLabel: sz.sizeLabel,
+      stock: sz.stock,
+      zqtu: sz.zqtu,
+      ztime: sz.ztime,
+      r2: sz.r2,
+      shipped: sz.shipped || 0,
+      batch1: sz.batch1, batch2: sz.batch2,
+      batch3: sz.batch3, batch4: sz.batch4
+    });
+  });
+
+  render();
+  document.getElementById('addAllBtn').textContent = '✓ 已添加';
+}
+
+function clearPreview() {
+  var code = document.getElementById('skuSel').value;
+  if (code) {
+    list = list.filter(function(r) { return r.code !== code; });
+    render();
+  }
+  previewSizes.forEach(function(sz) {
+    sz.zqtu = 0;
+    sz.ztime = 1;
+    sz.shipped = 0;
+    var b = calcSizeBatches(sz);
+    sz.batch1 = b.batch1; sz.batch2 = b.batch2;
+    sz.batch3 = b.batch3; sz.batch4 = b.batch4;
+  });
+  renderPreview();
+  document.getElementById('addAllBtn').textContent = '✓ 添加到清单';
+}
+
+function delRow(id) {
+  list = list.filter(function(r) { return r.id !== id; });
+  render();
+  document.getElementById('detailArea').style.display = 'none';
+}
+var selectedId = null;
+function selectRow(id) {
+  document.querySelectorAll('#body tr').forEach(function(tr){ tr.classList.remove('selected'); });
+  var el = document.querySelector('#body tr[onclick*="selectRow(' + id + ')"]');
+  if (el) el.classList.add('selected');
+  selectedId = id;
+  var r = list.find(function(item){ return item.id === id; });
+  if (!r) return;
+  var detail = document.getElementById('detailArea');
+  var batches = [
+    {label:'48h发货', val:r.batch1, color:'#22c55e'},
+    {label:'7d发货', val:r.batch2, color:'#eab308'},
+    {label:'15d发货', val:r.batch3, color:'#fb923c'},
+    {label:'25d发货', val:r.batch4, color:'#ef4444'}
+  ];
+  var html = '<div style="padding:12px">';
+  html += '<div style="font-size:12px;color:#9CA3AF;margin-bottom:8px">';
+  html += '<span style="font-weight:700;color:#fff;font-size:14px">' + r.code + '</span> · ' + r.sizeLabel;
+  html += ' &nbsp;|&nbsp; 库存 <span style="color:#fff">' + r.stock + '</span>';
+  if (r.zqtu > 0) html += ' &nbsp;|&nbsp; 在途 <span style="color:#818cf8">' + r.zqtu + '</span> <span style="color:#6B7280">(' + TIME_MAP[r.ztime] + ')</span>';
+  if ((r.shipped || 0) > 0) html += ' &nbsp;|&nbsp; 已发 <span style="color:#fb923c">' + r.shipped + '</span>';
+  html += ' &nbsp;|&nbsp; 退货率 <span style="color:' + (r.r2>=60?'#ef4444':r.r2>=45?'#eab308':'#22c55e') + ';font-weight:700">' + r.r2 + '%</span>';
+  html += '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">';
+  batches.forEach(function(b){
+    html += '<div style="background:#262626;border-radius:8px;padding:10px;text-align:center">';
+    html += '<div style="font-size:10px;color:#6B7280">' + b.label + '</div>';
+    html += '<div style="font-size:20px;font-weight:700;color:' + b.color + '">' + b.val + '</div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  detail.innerHTML = html;
+  detail.style.display = 'block';
+}
+function clearList() { list = []; render(); document.getElementById('detailArea').style.display = 'none'; }
+
+function render() {
+  var tbody = document.getElementById('body');
+  tbody.innerHTML = '';
+
+  var totStock = 0, totZaitu = 0, tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0, totRate = 0, totShipped = 0;
+
+  list.forEach(function(r) {
+    var r2c = r.r2 >= 60 ? '#ef4444' : r.r2 >= 45 ? '#eab308' : '#22c55e';
+    var timeTag = r.zqtu > 0 ? '<span class="zt-chip-inline">' + TIME_MAP[r.ztime] + '</span>' : '';
+    var tr = document.createElement('tr');
+    tr.className = 'list-row';
+    tr.onclick = function(e){ if(e.target.tagName!=='SPAN') selectRow(r.id); };
+    tr.innerHTML =
+      '<td style="font-weight:600">' + r.code + '</td>' +
+      '<td>' + r.sizeLabel + '</td>' +
+      '<td class="r">' + r.stock + '</td>' +
+      '<td class="r" style="color:#818cf8">' + (r.zqtu > 0 ? r.zqtu : '—') + '</td>' +
+      '<td class="r" style="color:#fb923c">' + ((r.shipped || 0) > 0 ? r.shipped : '—') + '</td>' +
+      '<td>' + timeTag + '</td>' +
+      '<td class="r" style="color:' + r2c + '">' + r.r2 + '%</td>' +
+      '<td class="r"><span class="batch-chip chip-48h">' + r.batch1 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-7d">' + r.batch2 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-15d">' + r.batch3 + '</span></td>' +
+      '<td class="r"><span class="batch-chip chip-25d">' + r.batch4 + '</span></td>' +
+      '<td><span class="del" onclick="event.stopPropagation();delRow(' + r.id + ')">✕</span></td>';
+    tbody.appendChild(tr);
+
+    totStock += r.stock;
+    totZaitu += r.zqtu || 0;
+    totShipped += r.shipped || 0;
+    tot1 += r.batch1; tot2 += r.batch2; tot3 += r.batch3; tot4 += r.batch4;
+    totRate += r.r2;
+  });
+
+  var cnt = list.length;
+  var uniqCodes = {};
+  list.forEach(function(r) { uniqCodes[r.code] = true; });
+  document.getElementById('cnt').textContent = cnt > 0 ? '（' + cnt + '条，' + Object.keys(uniqCodes).length + '款）' : '';
+  document.getElementById('clearBtn').disabled = cnt === 0;
+
+  if (cnt > 0) {
+    document.getElementById('totStock').textContent  = totStock;
+    document.getElementById('totZaitu').textContent  = totZaitu;
+    document.getElementById('totShipped').textContent  = totShipped;
+    document.getElementById('tot48').textContent  = tot1;
+    document.getElementById('tot7').textContent   = tot2;
+    document.getElementById('tot15').textContent  = tot3;
+    document.getElementById('tot25').textContent  = tot4;
+    document.getElementById('totTotal').textContent = tot1 + tot2 + tot3 + tot4;
+    document.getElementById('totAvgRate').textContent = (totRate / cnt).toFixed(1) + '%';
+    document.getElementById('totArea').style.display = 'block';
+  } else {
+    document.getElementById('totArea').style.display = 'none';
+  }
+  document.getElementById('addAllBtn').textContent = '✓ 添加到清单';
+}
+
+function showProgress(show, label, count, filename) {
+  document.getElementById('progressWrap').style.display = show ? 'block' : 'none';
+  if (show) {
+    document.getElementById('progLabel').textContent = label;
+    document.getElementById('progCount').textContent = count;
+    document.getElementById('progFill').style.width = '0%';
+    if (filename) {
+      document.getElementById('uploadStatus').textContent = '📄 ' + filename;
+      document.getElementById('uploadStatus').style.display = 'block';
+    }
+  } else {
+    document.getElementById('uploadStatus').style.display = 'none';
+  }
+}
+function hideProgress() { document.getElementById('progressWrap').style.display = 'none'; }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>

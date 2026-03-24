@@ -1,0 +1,26 @@
+plugins = []
+headers = []
+redirects = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "/Users/amorfati/.openclaw/workspace/return-rate-calculator"
+publishOrigin = "default"
+base = "/Users/amorfati/.openclaw/workspace/return-rate-calculator"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
