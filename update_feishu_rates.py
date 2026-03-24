@@ -10,6 +10,7 @@ import json
 import re
 import sys
 import os
+import time
 
 FEISHU_APP_ID = "cli_a928e28f0ff6dbca"
 FEISHU_APP_SECRET = "nc7WEIwxiLrB72ID0T4RygVp45CuNQcj"
@@ -120,8 +121,10 @@ def save_json_file(rates, json_path, updated_time):
 
 
 def deploy():
+    token = os.environ.get("FIREBASE_TOKEN", "")
+    token_arg = f' --token "{token}"' if token else ""
     print("\n🚀 正在部署到 Firebase Hosting...")
-    result = os.system("cd " + os.path.dirname(os.path.abspath(__file__)) + " && firebase deploy --only hosting 2>&1")
+    result = os.system('cd "' + os.path.dirname(os.path.abspath(__file__)) + '" && firebase deploy --only hosting' + token_arg + ' 2>&1')
     if result != 0:
         print("⚠️  部署失败，请检查 Firebase CLI 配置")
         return False
@@ -151,7 +154,6 @@ def main():
     update_html_file(HTML_FILE, js_obj, len(rates))
 
     print("\n🔧 正在生成 feishu_rates.json...")
-    import time
     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "feishu_rates.json")
     save_json_file(rates, json_path, time.strftime("%Y-%m-%d %H:%M"))
 
