@@ -133,7 +133,7 @@ select:focus{outline:none;border-color:#6366f1}
 <div class="cd">
   <div class="tt">📂 本地库存文件导入</div>
   <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFile(event)">
-  <label for="fileInput">📁 点击上传库存 CSV 或 Excel 文件<br><span style="font-size:11px;color:#555;margin-top:4px;display:block">支持 .csv / .xlsx / .xls，需包含：商品编码、商品条码、可用库存、在途库存（选填）｜退货率自动从飞书「有货退」（共2256条）匹配</span></label>
+  <label for="fileInput">📁 点击上传库存 CSV 或 Excel 文件<br><span style="font-size:11px;color:#555;margin-top:4px;display:block">支持 .csv / .xlsx / .xls，需包含：商品编码、商品条码、实际库存、锁定库存（可用库存=实际-锁定）、在途库存（选填）｜退货率自动从飞书「有货退」（共2256条）匹配</span></label>
   <div id="uploadStatus" style="display:none"></div>
   <div id="feishuStatus" style="font-size:11px;margin-top:6px;color:#22c55e">✓ 飞书退货率已就绪（共 2256 条）</div>
   <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
@@ -229,7 +229,8 @@ select:focus{outline:none;border-color:#6366f1}
         <thead>
           <tr>
             <th>尺码</th>
-            <th>库存</th>
+            <th>实际</th>
+            <th>锁定</th>
             <th>在途</th>
             <th>已发</th>
             <th>退货率</th>
@@ -246,8 +247,12 @@ select:focus{outline:none;border-color:#6366f1}
     <div id="previewTotals" style="background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:10px 12px;margin-top:10px">
       <div style="display:flex;gap:16px;flex-wrap:wrap">
         <div style="text-align:center;flex:1;min-width:60px">
-          <div style="font-size:10px;color:#6B7280">可用库存</div>
+          <div style="font-size:10px;color:#6B7280">实际库存</div>
           <div style="font-size:16px;font-weight:700" id="pvStock">0</div>
+        </div>
+        <div style="text-align:center;flex:1;min-width:60px">
+          <div style="font-size:10px;color:#6B7280">锁定库存</div>
+          <div style="font-size:16px;font-weight:700" id="pvLocked">0</div>
         </div>
         <div style="text-align:center;flex:1;min-width:60px">
           <div style="font-size:10px;color:#6B7280">在途库存</div>
@@ -295,7 +300,8 @@ select:focus{outline:none;border-color:#6366f1}
         <tr>
           <th>商品编码</th>
           <th>尺码</th>
-          <th class="r">库存</th>
+          <th class="r">实际</th>
+          <th class="r">锁定</th>
           <th class="r">在途</th>
           <th class="r">已发</th>
           <th>发货</th>
@@ -313,7 +319,8 @@ select:focus{outline:none;border-color:#6366f1}
   <div id="detailArea" style="display:none;margin-top:8px"></div>
   <div id="totArea" style="display:none">
     <div class="tot-grid">
-      <div class="tot-box"><div class="l">合计可用库存</div><div class="v" id="totStock">0</div></div>
+      <div class="tot-box"><div class="l">合计实际库存</div><div class="v" id="totStock">0</div></div>
+      <div class="tot-box"><div class="l">合计锁定库存</div><div class="v" id="totLocked">0</div></div>
       <div class="tot-box"><div class="l">合计在途</div><div class="v" id="totZaitu">0</div></div>
       <div class="tot-box"><div class="l">合计已发</div><div class="v o" id="totShipped">0</div></div>
       <div class="tot-box"><div class="l">合计48h</div><div class="v g" id="tot48">0</div></div>
@@ -329,7 +336,7 @@ select:focus{outline:none;border-color:#6366f1}
   <button class="bt danger" onclick="clearList()" style="margin-top:8px" id="clearBtn" disabled>🗑 清空清单</button>
   <button class="bt export" onclick="exportExcel()" id="exportBtn" disabled style="margin-top:8px">📤 导出 Excel</button>
   <div class="notes">
-    <span>💡 <strong>逻辑：</strong>可用库存：48h发，退回进入7d→15d→25d循环。在途库存：进入指定批次，如选7天则直接作为7d发货，退回进15d→25d</span>
+    <span>💡 <strong>逻辑：</strong>可用库存=实际库存-锁定库存，48h发，退回进入7d→15d→25d循环。在途库存：进入指定批次，如选7天则直接作为7d发货，退回进15d→25d</span>
   </div>
 </div>
 
@@ -2670,42 +2677,53 @@ function calcBatches(stock, returnRate) {
   return calcBatchesFrom(stock, returnRate, 1);
 }
 
-// 计算某尺码的完整批次（含在途）
+// 新批次计算：债务滚动模型
+// physStock: 实际库存(可用+锁定前的原始库存)
+// lockStock: 锁定库存(欠债)
+// zqtu: 在途库存
+// ztime: 在途发货时间(1=48h, 2=7d, 3=15d, 4=25d)
+// shipped: 已发货(上轮已发出的货)
+function calculateReturnFlow(sz) {
+  var r = (sz.r2 || 55) / 100;
+  var res = { batch1: 0, batch2: 0, batch3: 0, batch4: 0 };
+
+  // --- 第一阶段：48h (batch1) ---
+  // 可用实物 = 实际库存 + 48h内到货的在途
+  var transit48 = (sz.ztime == 1) ? sz.zqtu : 0;
+  var availableNow = (sz.physStock || 0) + transit48;
+
+  // batch1 = 实物 - 债务(锁定)
+  res.batch1 = availableNow - (sz.lockStock || 0);
+
+  // --- 第二阶段：7d (batch2) ---
+  // 1. 计算batch1阶段实际发出的包裹
+  var actualPackagesSentB1 = Math.min(availableNow, (sz.lockStock || 0) + Math.max(0, res.batch1));
+  // 2. 回笼货：batch1发的退回 + 历史发的退回 + 7d在途
+  var returnsFromB1 = Math.floor(actualPackagesSentB1 * r);
+  var returnsFromHist = Math.floor((sz.shipped || 0) * r);
+  var transit7 = (sz.ztime == 2) ? sz.zqtu : 0;
+  // 3. 偿还batch1留下的债务
+  var debtFromB1 = res.batch1 < 0 ? Math.abs(res.batch1) : 0;
+  res.batch2 = (returnsFromB1 + returnsFromHist + transit7) - debtFromB1;
+
+  // --- 第三阶段：15d (batch3) ---
+  var debtFromB2 = res.batch2 < 0 ? Math.abs(res.batch2) : 0;
+  var actualPackagesSentB2 = Math.max(0, res.batch2 + debtFromB2);
+  var transit15 = (sz.ztime == 3) ? sz.zqtu : 0;
+  res.batch3 = Math.floor(actualPackagesSentB2 * r) + transit15 - debtFromB2;
+
+  // --- 第四阶段：25d (batch4) ---
+  var debtFromB3 = res.batch3 < 0 ? Math.abs(res.batch3) : 0;
+  var actualPackagesSentB3 = Math.max(0, res.batch3 + debtFromB3);
+  var transit25 = (sz.ztime == 4) ? sz.zqtu : 0;
+  res.batch4 = Math.floor(actualPackagesSentB3 * r) + transit25 - debtFromB3;
+
+  return res;
+}
+
+// 兼容性别名
 function calcSizeBatches(sz) {
-  var r = sz.r2 / 100;
-  var b = { batch1:0, batch2:0, batch3:0, batch4:0 };
-  // 可用库存 → 48h 循环（支持负数）
-  if (sz.stock !== 0) {
-    b.batch1 += Math.floor(sz.stock);
-    b.batch2 += Math.floor(sz.stock * r);
-    b.batch3 += Math.floor(sz.stock * r * r);
-    b.batch4 += Math.floor(sz.stock * r * r * r);
-  }
-  // 在途库存 → 指定批次循环
-  if (sz.zqtu > 0) {
-    if (sz.ztime === 1) {
-      b.batch1 += Math.floor(sz.zqtu);
-      b.batch2 += Math.floor(sz.zqtu * r);
-      b.batch3 += Math.floor(sz.zqtu * r * r);
-      b.batch4 += Math.floor(sz.zqtu * r * r * r);
-    } else if (sz.ztime === 2) {
-      b.batch2 += Math.floor(sz.zqtu);
-      b.batch3 += Math.floor(sz.zqtu * r);
-      b.batch4 += Math.floor(sz.zqtu * r * r);
-    } else if (sz.ztime === 3) {
-      b.batch3 += Math.floor(sz.zqtu);
-      b.batch4 += Math.floor(sz.zqtu * r);
-    } else if (sz.ztime === 4) {
-      b.batch4 += Math.floor(sz.zqtu);
-    }
-  }
-  // 已发库存 → 从7d开始循环
-  if (sz.shipped > 0) {
-    b.batch2 += Math.floor(sz.shipped * r);
-    b.batch3 += Math.floor(sz.shipped * r * r);
-    b.batch4 += Math.floor(sz.shipped * r * r * r);
-  }
-  return b;
+  return calculateReturnFlow(sz);
 }
 
 // 从 feishu_rates.json（同源文件）拉取最新有货退数据
@@ -2780,13 +2798,14 @@ function handleFile(evt) {
       var headers = raw[0].map(function(h) { return String(h).replace(/^\uFEFF/, '').trim(); });
       var idxCode    = headers.findIndex(function(h) { return /商品编码|款号|货号|SKU|style/i.test(h); });
       var idxBar     = headers.findIndex(function(h) { return /条码|barcode|bar/i.test(h); });
-      var idxStock   = headers.findIndex(function(h) { return h === '可用库存' || /可用库存/i.test(h); });
+      var idxActual  = headers.findIndex(function(h) { return h === '实际库存' || /实际库存/i.test(h); });
+      var idxLocked  = headers.findIndex(function(h) { return h === '锁定库存' || /锁定库存/i.test(h); });
       var idxZaitu   = headers.findIndex(function(h) { return h === '在途库存' || /在途|在途库存|在途数/i.test(h); });
       var idxR2      = headers.findIndex(function(h) { return /有货退/i.test(h); });
 
-      if (idxCode < 0 || idxStock < 0) {
+      if (idxCode < 0 || idxActual < 0) {
         hideProgress();
-        alert('未找到列：商品编码=' + idxCode + ' 可用库存=' + idxStock + '\n表头：' + headers.join(' | '));
+        alert('未找到列：商品编码=' + idxCode + ' 实际库存=' + idxActual + '\n表头：' + headers.join(' | '));
         return;
       }
 
@@ -2798,7 +2817,8 @@ function handleFile(evt) {
           console.log('★★调试行 di=' + di, 'bar=' + dbar);
           console.log('★★表头:', headers.slice(0, 13));
           console.log('★★该行前13列原始值:', JSON.stringify(drow.slice(0, 13)));
-          console.log('★★idxStock=' + idxStock + ' 对应列名=' + headers[idxStock] + ' 该列原始值=', drow[idxStock]);
+          console.log('★★idxActual=' + idxActual + ' 对应列名=' + headers[idxActual] + ' 该列原始值=', drow[idxActual]);
+          console.log('★★idxLocked=' + idxLocked + ' 对应列名=' + headers[idxLocked] + ' 该列原始值=', drow[idxLocked]);
           break;
         }
       }
@@ -2809,9 +2829,11 @@ function handleFile(evt) {
         var row = raw[i];
         var code   = String(row[idxCode] || '').trim();
         var bar    = idxBar  >= 0 ? String(row[idxBar]  || '').trim() : '';
-        var stockRaw = row[idxStock];
-        var stock  = parseFloat(stockRaw);
-        if (isNaN(stock)) stock = 0;
+        var actualRaw = row[idxActual];
+        var actual  = parseFloat(actualRaw);
+        if (isNaN(actual)) actual = 0;
+        var locked  = idxLocked >= 0 ? parseFloat(row[idxLocked]) || 0 : 0;
+        var stock   = actual - locked; // 可用库存 = 实际 - 锁定
         var zaitu  = idxZaitu >= 0 ? parseFloat(row[idxZaitu]) || 0 : 0;
         // 尺码：条码p后第5位；款号=条码p之前的内容
         var barOrCode = bar || code;
@@ -2826,7 +2848,7 @@ function handleFile(evt) {
         if (!code) continue;
         if (stock === 0 && zaitu === 0) continue;
 
-        sheetData.push({ code: code, bar: bar, stock: stock, zaitu: zaitu, r2: r2, sizeLabel: sizeLabel, kuanhao: kuanhao });
+        sheetData.push({ code: code, bar: bar, actual: actual, locked: locked, stock: stock, zaitu: zaitu, r2: r2, sizeLabel: sizeLabel, kuanhao: kuanhao });
 
         if (i % progEvery === 0 || i === raw.length - 1) {
           var pct = Math.round((i / total) * 100);
@@ -2844,11 +2866,15 @@ function handleFile(evt) {
         }
         var sizeEntry = codeMap[item.kuanhao].sizes.find(function(s) { return s.sizeLabel === item.sizeLabel; });
         if (sizeEntry) {
+          sizeEntry.actual += item.actual;
+          sizeEntry.locked += item.locked;
           sizeEntry.stock += item.stock;
           sizeEntry.zaitu += item.zaitu;
         } else {
           codeMap[item.kuanhao].sizes.push({
             sizeLabel: item.sizeLabel,
+            actual: item.actual,
+            locked: item.locked,
             stock: item.stock,
             zaitu: item.zaitu,
             r2: returnRate,
@@ -2924,7 +2950,7 @@ function addManualRow() {
   if (!code) { return; }
   if (stock <= 0 && zqtu <= 0 && shipped <= 0) { return; }
 
-  var item = { id: Date.now(), code: code, sizeLabel: sizeLabel, stock: stock, zqtu: zqtu, ztime: ztime, r2: r2, shipped: shipped };
+  var item = { id: Date.now(), code: code, sizeLabel: sizeLabel, physStock: stock, lockStock: 0, zqtu: zqtu, ztime: ztime, r2: r2, shipped: shipped };
   var b = calcSizeBatches(item);
   item.batch1 = b.batch1; item.batch2 = b.batch2; item.batch3 = b.batch3; item.batch4 = b.batch4;
 
@@ -2950,7 +2976,9 @@ function addAllManual() {
       id: Date.now() + Math.random(),
       code: item.code,
       sizeLabel: item.sizeLabel,
-      stock: item.stock,
+      actual: item.physStock || 0,
+      locked: item.lockStock || 0,
+      stock: (item.physStock || 0) - (item.lockStock || 0),
       zqtu: item.zqtu,
       ztime: item.ztime,
       r2: item.r2,
@@ -2974,7 +3002,7 @@ function renderManualList() {
     html += '<div style="background:#262626;border:1px solid #333;border-radius:8px;padding:6px 10px;font-size:12px">';
     html += '<span style="font-weight:600">' + item.code + '</span> ';
     html += '<span style="color:#9CA3AF">' + item.sizeLabel + '</span> ';
-    html += '<span>库存:' + item.stock + '</span> ';
+    html += '<span>库存:' + (item.physStock || 0) + '</span> ';
     html += '<span style="color:#818cf8">在:' + item.zqtu + '</span> ';
     html += '<span style="color:#fb923c">发:' + (item.shipped||0) + '</span> ';
     html += '<span style="color:' + color + '">' + item.r2 + '%</span>';
@@ -3120,13 +3148,14 @@ function selSKU() {
     var orderKey = sz.kuanhao + '|' + sz.sizeLabel;  // 与 handleOrderFile 保持完全一致
     var shippedFromMap = window.orderShippedMap && window.orderShippedMap[orderKey];
     var shipped = (shippedFromMap > 0) ? shippedFromMap : (sz.shipped || 0);
-    var b = calcSizeBatches({ stock: sz.stock, zqtu: sz.zaitu, ztime: 2, r2: sz.r2, shipped: shipped });
+    var b = calcSizeBatches({ physStock: sz.actual, lockStock: sz.locked, zqtu: sz.zaitu, ztime: sz.ztime, r2: sz.r2, shipped: shipped });
     return {
       sizeLabel: sz.sizeLabel,
       kuanhao: sz.kuanhao || code,
-      stock: sz.stock,
+      physStock: sz.actual || 0,
+      lockStock: sz.locked || 0,
       zqtu: sz.zaitu || 0,
-      ztime: 2,
+      ztime: sz.ztime || 2,
       r2: sz.r2,
       shipped: shipped,
       batch1: b.batch1, batch2: b.batch2, batch3: b.batch3, batch4: b.batch4
@@ -3146,7 +3175,7 @@ function selSKU() {
 function renderPreview() {
   var tbody = document.getElementById('previewBody');
   tbody.innerHTML = '';
-  var totStock = 0, totZaitu = 0, tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
+  var totActual = 0, totLocked = 0, totZaitu = 0, tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0;
 
   previewSizes.forEach(function(sz, idx) {
     var r2c = sz.r2 >= 60 ? '#ef4444' : sz.r2 >= 45 ? '#eab308' : '#22c55e';
@@ -3165,7 +3194,8 @@ function renderPreview() {
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td class="size-name">' + sz.sizeLabel + '</td>' +
-      '<td class="r">' + sz.stock + '</td>' +
+      '<td class="r">' + (sz.physStock || 0) + '</td>' +
+      '<td class="r">' + (sz.lockStock || 0) + '</td>' +
       '<td class="r">' +
         '<div class="zaitu-inline">' +
           '<input type="number" class="num-input" value="' + zqtuVal + '" placeholder="+" min="0" onchange="updatePreviewZqtu(' + idx + ', this.value)">' +
@@ -3179,12 +3209,14 @@ function renderPreview() {
       '<td class="r"><span class="batch-chip chip-15d">' + sz.batch3 + '</span></td>' +
       '<td class="r"><span class="batch-chip chip-25d">' + sz.batch4 + '</span></td>';
     tbody.appendChild(tr);
-    totStock += sz.stock;
+    totActual += sz.physStock || 0;
+    totLocked += sz.lockStock || 0;
     totZaitu += sz.zqtu;
     tot1 += sz.batch1; tot2 += sz.batch2; tot3 += sz.batch3; tot4 += sz.batch4;
   });
 
-  document.getElementById('pvStock').textContent = totStock;
+  document.getElementById('pvStock').textContent = totActual;
+  document.getElementById('pvLocked').textContent = totLocked;
   document.getElementById('pvZaitu').textContent = totZaitu;
   var totShipped = previewSizes.reduce(function(s, sz) { return s + (sz.shipped || 0); }, 0);
   document.getElementById('pvShipped').textContent = totShipped;
@@ -3253,7 +3285,9 @@ function addAllSizes() {
       id: Date.now() + Math.random(),
       code: code,
       sizeLabel: sz.sizeLabel,
-      stock: sz.stock,
+      actual: sz.physStock || 0,
+      locked: sz.lockStock || 0,
+      stock: (sz.physStock || 0) - (sz.lockStock || 0),
       zqtu: sz.zqtu,
       ztime: sz.ztime,
       r2: sz.r2,
@@ -3311,7 +3345,8 @@ function selectRow(id) {
   var html = '<div style="padding:12px">';
   html += '<div style="font-size:12px;color:#9CA3AF;margin-bottom:8px">';
   html += '<span style="font-weight:700;color:#fff;font-size:14px">' + (r.kuanhao || r.code) + '</span> · ' + r.sizeLabel;
-  html += ' &nbsp;|&nbsp; 库存 <span style="color:#fff">' + r.stock + '</span>';
+  html += ' &nbsp;|&nbsp; 实际 <span style="color:#fff">' + (r.actual || 0) + '</span>';
+  html += ' &nbsp;|&nbsp; 锁定 <span style="color:#eab308">' + (r.locked || 0) + '</span>';
   if (r.zqtu > 0) html += ' &nbsp;|&nbsp; 在途 <span style="color:#818cf8">' + r.zqtu + '</span> <span style="color:#6B7280">(' + TIME_MAP[r.ztime] + ')</span>';
   if ((r.shipped || 0) > 0) html += ' &nbsp;|&nbsp; 已发 <span style="color:#fb923c">' + r.shipped + '</span>';
   html += ' &nbsp;|&nbsp; 退货率 <span style="color:' + (r.r2>=60?'#ef4444':r.r2>=45?'#eab308':'#22c55e') + ';font-weight:700">' + r.r2 + '%</span>';
@@ -3333,7 +3368,7 @@ function render() {
   var tbody = document.getElementById('body');
   tbody.innerHTML = '';
 
-  var totStock = 0, totZaitu = 0, tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0, totRate = 0, totShipped = 0;
+  var totActual = 0, totLocked = 0, totZaitu = 0, tot1 = 0, tot2 = 0, tot3 = 0, tot4 = 0, totRate = 0, totShipped = 0;
 
   list.forEach(function(r) {
     var r2c = r.r2 >= 60 ? '#ef4444' : r.r2 >= 45 ? '#eab308' : '#22c55e';
@@ -3344,7 +3379,8 @@ function render() {
     tr.innerHTML =
       '<td style="font-weight:600">' + (r.kuanhao || r.code) + '</td>' +
       '<td>' + r.sizeLabel + '</td>' +
-      '<td class="r">' + r.stock + '</td>' +
+      '<td class="r">' + (r.actual || 0) + '</td>' +
+      '<td class="r">' + (r.locked || 0) + '</td>' +
       '<td class="r" style="color:#818cf8">' + (r.zqtu > 0 ? r.zqtu : '—') + '</td>' +
       '<td class="r" style="color:#fb923c">' + ((r.shipped || 0) > 0 ? r.shipped : '—') + '</td>' +
       '<td>' + timeTag + '</td>' +
@@ -3356,7 +3392,8 @@ function render() {
       '<td><span class="del" onclick="event.stopPropagation();delRow(' + r.id + ')">✕</span></td>';
     tbody.appendChild(tr);
 
-    totStock += r.stock;
+    totActual += r.actual || 0;
+    totLocked += r.locked || 0;
     totZaitu += r.zqtu || 0;
     totShipped += r.shipped || 0;
     tot1 += r.batch1; tot2 += r.batch2; tot3 += r.batch3; tot4 += r.batch4;
@@ -3371,7 +3408,8 @@ function render() {
   document.getElementById('exportBtn').disabled = cnt === 0;
 
   if (cnt > 0) {
-    document.getElementById('totStock').textContent  = totStock;
+    document.getElementById('totStock').textContent  = totActual;
+    document.getElementById('totLocked').textContent  = totLocked;
     document.getElementById('totZaitu').textContent  = totZaitu;
     document.getElementById('totShipped').textContent  = totShipped;
     document.getElementById('tot48').textContent  = tot1;
@@ -3410,7 +3448,8 @@ function exportExcel() {
     return {
       '款号': r.kuanhao || r.code,
       '尺码': r.sizeLabel,
-      '库存': r.stock,
+      '实际库存': r.actual || 0,
+      '锁定库存': r.locked || 0,
       '在途': r.zqtu || 0,
       '发货批次': TIME_MAP[r.ztime] || '48h',
       '已发': r.shipped || 0,
